@@ -18,5 +18,10 @@
 #
 ##############################################################################
 from . import models
-from . import server_env
-from .server_env import serv_config, setboolean
+# TODO when migrating to 12, fix the import of serv_config by renaming the
+# file?
+# Add an alias to access to the 'serv_config' module as it is shadowed
+# in the following line by an import of a variable with the same name.
+# We can't change the import of serv_config for backward compatibility.
+from . import serv_config as server_env
+from .serv_config import serv_config, setboolean
