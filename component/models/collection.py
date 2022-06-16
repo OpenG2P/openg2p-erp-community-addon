@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
@@ -16,12 +15,13 @@ to use in the `_collection` of the Components usable for the Backend.
 
 from contextlib import contextmanager
 
-from odoo import models, api
+from odoo import models
+
 from ..core import WorkContext
 
 
 class Collection(models.AbstractModel):
-    """ The model on which components are subscribed
+    """The model on which components are subscribed
 
     It would be for instance the ``backend`` for the connectors.
 
@@ -55,13 +55,13 @@ class Collection(models.AbstractModel):
 
 
     """
-    _name = 'collection.base'
-    _description = 'Base Abstract Collection'
+
+    _name = "collection.base"
+    _description = "Base Abstract Collection"
 
     @contextmanager
-    @api.multi
     def work_on(self, model_name, **kwargs):
-        """ Entry-point for the components, context manager
+        """Entry-point for the components, context manager
 
         Start a work using the components on the model.
         Any keyword argument will be assigned to the work context.
@@ -71,7 +71,6 @@ class Collection(models.AbstractModel):
         at the end of the work session, such as::
 
             @contextmanager
-            @api.multi
             def work_on(self, model_name, **kwargs):
                 self.ensure_one()
                 magento_location = MagentoLocation(
@@ -94,4 +93,9 @@ class Collection(models.AbstractModel):
 
         """
         self.ensure_one()
+        # Allow propagation of custom component registry via context
+        # TODO: maybe to be moved to `WorkContext.__init__`
+        components_registry = self.env.context.get("components_registry")
+        if components_registry:
+            kwargs["components_registry"] = components_registry
         yield WorkContext(model_name=model_name, collection=self, **kwargs)

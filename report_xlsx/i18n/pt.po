@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2019-08-14 13:44+0000\n"
+"PO-Revision-Date: 2021-07-02 23:48+0000\n"
 "Last-Translator: Pedro Castro Silva <pedrocs@exo.pt>\n"
 "Language-Team: none\n"
 "Language: pt\n"
@@ -14,17 +14,17 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 3.7.1\n"
+"X-Generator: Weblate 4.3.2\n"
 
 #. module: report_xlsx
-#: code:addons/report_xlsx/models/ir_report.py:18
+#: code:addons/report_xlsx/models/ir_report.py:0
 #, python-format
 msgid "%s model was not found"
 msgstr "O modelo %s não foi encontrado"
 
 #. module: report_xlsx
 #. openerp-web
-#: code:addons/report_xlsx/static/src/js/report/action_manager_report.js:49
+#: code:addons/report_xlsx/static/src/js/report/action_manager_report.js:0
 #, python-format
 msgid ""
 "A popup window with your report was blocked. You may need to change your "
@@ -45,11 +45,6 @@ msgid "Display Name"
 msgstr "Nome a Exibir"
 
 #. module: report_xlsx
-#: selection:ir.actions.report,report_type:0
-msgid "HTML"
-msgstr "HTML"
-
-#. module: report_xlsx
 #: model:ir.model.fields,field_description:report_xlsx.field_report_report_xlsx_abstract__id
 #: model:ir.model.fields,field_description:report_xlsx.field_report_report_xlsx_partner_xlsx__id
 msgid "ID"
@@ -62,19 +57,14 @@ msgid "Last Modified on"
 msgstr "Última Modificação em"
 
 #. module: report_xlsx
-#: selection:ir.actions.report,report_type:0
-msgid "PDF"
-msgstr "PDF"
+#: model:ir.model,name:report_xlsx.model_report_report_xlsx_partner_xlsx
+msgid "Partner XLSX Report"
+msgstr "Relatório de Parceiro XLSX"
 
 #. module: report_xlsx
 #: model:ir.actions.report,name:report_xlsx.partner_xlsx
 msgid "Print to XLSX"
 msgstr "Imprimir para XLSX"
-
-#. module: report_xlsx
-#: selection:ir.actions.report,report_type:0
-msgid "Py3o"
-msgstr "Py3o"
 
 #. module: report_xlsx
 #: model:ir.model,name:report_xlsx.model_ir_actions_report
@@ -87,11 +77,6 @@ msgid "Report Type"
 msgstr "Tipo de Relatório"
 
 #. module: report_xlsx
-#: selection:ir.actions.report,report_type:0
-msgid "Text"
-msgstr "Texto"
-
-#. module: report_xlsx
 #: model:ir.model.fields,help:report_xlsx.field_ir_actions_report__report_type
 msgid ""
 "The type of the report that will be rendered, each one having its own "
@@ -100,33 +85,33 @@ msgid ""
 "downloaded by the user."
 msgstr ""
 "O tipo de relatório que será produzido, tendo cada qual o seu método de "
-"produção. HTML significa que o relatório será aberto diretamente  no seu "
+"produção. HTML significa que o relatório será aberto diretamente no seu "
 "browser. PDF indica que o relatório será produzido com o Wkhtmltopdf e "
 "descarregado pelo utilizador."
 
 #. module: report_xlsx
 #. openerp-web
-#: code:addons/report_xlsx/static/src/js/report/action_manager_report.js:52
+#: code:addons/report_xlsx/static/src/js/report/action_manager_report.js:0
 #, python-format
 msgid "Warning"
 msgstr "Aviso"
 
 #. module: report_xlsx
-#: selection:ir.actions.report,report_type:0
+#: model:ir.model.fields.selection,name:report_xlsx.selection__ir_actions_report__report_type__xlsx
 msgid "XLSX"
 msgstr "XLSX"
 
-#. module: report_xlsx
-#: selection:ir.actions.report,report_type:0
-msgid "XML"
-msgstr "XML"
+#~ msgid "HTML"
+#~ msgstr "HTML"
 
-#. module: report_xlsx
-#: selection:ir.actions.report,report_type:0
-msgid "csv"
-msgstr ""
+#~ msgid "PDF"
+#~ msgstr "PDF"
 
-#. module: report_xlsx
-#: model:ir.model,name:report_xlsx.model_report_report_xlsx_partner_xlsx
-msgid "report.report_xlsx.partner_xlsx"
-msgstr ""
+#~ msgid "Py3o"
+#~ msgstr "Py3o"
+
+#~ msgid "Text"
+#~ msgstr "Texto"
+
+#~ msgid "XML"
+#~ msgstr "XML"

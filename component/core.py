@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 Camptocamp SA
 # Copyright 2017 Odoo
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
@@ -19,13 +18,12 @@ The most common classes used publicly are:
 
 import logging
 import operator
-
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 
 from odoo import models
-from odoo.tools import OrderedSet, LastOrderedSet
-from .exception import NoComponentError, SeveralComponentError
+from odoo.tools import LastOrderedSet, OrderedSet
 
+from .exception import NoComponentError, SeveralComponentError
 
 _logger = logging.getLogger(__name__)
 
@@ -50,20 +48,20 @@ def _get_addon_name(full_name):
     # or not. For instance, module ``sale`` can be imported as
     # ``odoo.addons.sale`` (the right way) or ``sale`` (for backward
     # compatibility).
-    module_parts = full_name.split('.')
-    if len(module_parts) > 2 and module_parts[:2] == ['odoo', 'addons']:
-        addon_name = full_name.split('.')[2]
+    module_parts = full_name.split(".")
+    if len(module_parts) > 2 and module_parts[:2] == ["odoo", "addons"]:
+        addon_name = full_name.split(".")[2]
     else:
-        addon_name = full_name.split('.')[0]
+        addon_name = full_name.split(".")[0]
     return addon_name
 
 
 class ComponentDatabases(dict):
-    """ Holds a registry of components for each database """
+    """Holds a registry of components for each database"""
 
 
 class ComponentRegistry(object):
-    """ Store all the components and allow to find them using criteria
+    """Store all the components and allow to find them using criteria
 
     The key is the ``_name`` of the components.
 
@@ -103,9 +101,9 @@ class ComponentRegistry(object):
             component_class._build_component(self)
         self._loaded_modules.add(module)
 
-    @cachedmethod(operator.attrgetter('_cache'))
+    @cachedmethod(operator.attrgetter("_cache"))
     def lookup(self, collection_name=None, usage=None, model_name=None):
-        """ Find and return a list of components for a usage
+        """Find and return a list of components for a usage
 
         If a component is not registered in a particular collection (no
         ``_collection``), it will be returned in any case (as far as
@@ -136,25 +134,32 @@ class ComponentRegistry(object):
 
         # keep the order so addons loaded first have components used first
         candidates = (
-            component for component in self._components.values()
+            component
+            for component in self._components.values()
             if not component._abstract
         )
 
         if collection_name is not None:
             candidates = (
-                component for component in candidates
-                if (component._collection == collection_name or
-                    component._collection is None)
+                component
+                for component in candidates
+                if (
+                    component._collection == collection_name
+                    or component._collection is None
+                )
             )
 
         if usage is not None:
-            candidates = (component for component in candidates
-                          if component._usage == usage)
+            candidates = (
+                component for component in candidates if component._usage == usage
+            )
 
         if model_name is not None:
-            candidates = (c for c in candidates
-                          if c.apply_on_models is None or
-                          model_name in c.apply_on_models)
+            candidates = (
+                c
+                for c in candidates
+                if c.apply_on_models is None or model_name in c.apply_on_models
+            )
 
         return list(candidates)
 
@@ -165,7 +170,7 @@ _component_databases = ComponentDatabases()
 
 
 class WorkContext(object):
-    """ Transport the context required to work with components
+    """Transport the context required to work with components
 
     It is propagated through all the components, so any
     data or instance (like a random RPC client) that need
@@ -234,10 +239,12 @@ class WorkContext(object):
 
     """
 
-    def __init__(self, model_name=None, collection=None,
-                 components_registry=None, **kwargs):
+    def __init__(
+        self, model_name=None, collection=None, components_registry=None, **kwargs
+    ):
         self.collection = collection
         self.model_name = model_name
+        self.model = self.env[model_name]
         # lookup components in an alternative registry, used by the tests
         if components_registry is not None:
             self.components_registry = components_registry
@@ -247,47 +254,37 @@ class WorkContext(object):
                 self.components_registry = _component_databases[dbname]
             except KeyError:
                 _logger.error(
-                    'No component registry for database %s. '
-                    'Probably because the Odoo registry has not been built '
-                    'yet.', dbname
+                    "No component registry for database %s. "
+                    "Probably because the Odoo registry has not been built "
+                    "yet.",
+                    dbname,
                 )
                 raise
-        self._propagate_kwargs = [
-            'collection',
-            'model_name',
-            'components_registry',
-        ]
+        self._propagate_kwargs = ["collection", "model_name", "components_registry"]
         for attr_name, value in kwargs.items():
             setattr(self, attr_name, value)
             self._propagate_kwargs.append(attr_name)
 
     @property
     def env(self):
-        """ Return the current Odoo env
+        """Return the current Odoo env
 
         This is the environment of the current collection.
         """
         return self.collection.env
 
-    @property
-    def model(self):
-        """ Return the current Odoo model
-
-        This is the model of the current environment.
-        """
-        return self.env[self.model_name]
-
     def work_on(self, model_name=None, collection=None):
-        """ Create a new work context for another model keeping attributes
+        """Create a new work context for another model keeping attributes
 
         Used when one need to lookup components for another model.
         """
-        kwargs = {attr_name: getattr(self, attr_name)
-                  for attr_name in self._propagate_kwargs}
+        kwargs = {
+            attr_name: getattr(self, attr_name) for attr_name in self._propagate_kwargs
+        }
         if collection is not None:
-            kwargs['collection'] = collection
+            kwargs["collection"] = collection
         if model_name is not None:
-            kwargs['model_name'] = model_name
+            kwargs["model_name"] = model_name
         return self.__class__(**kwargs)
 
     def _component_class_by_name(self, name):
@@ -298,7 +295,7 @@ class WorkContext(object):
         return component_class
 
     def component_by_name(self, name, model_name=None):
-        """ Return a component by its name
+        """Return a component by its name
 
         If the component exists, an instance of it will be returned,
         initialized with the current :class:`WorkContext`.
@@ -319,26 +316,28 @@ class WorkContext(object):
             model_name = model_name._name
         component_class = self._component_class_by_name(name)
         work_model = model_name or self.model_name
-        if (component_class._collection and
-                self.collection._name != component_class._collection):
+        if (
+            component_class._collection
+            and self.collection._name != component_class._collection
+        ):
             raise NoComponentError(
                 "Component with name '%s' can't be used for collection '%s'."
-                (name, self.collection._name)
+                % (name, self.collection._name)
             )
 
-        if (component_class.apply_on_models and
-                work_model not in component_class.apply_on_models):
+        if (
+            component_class.apply_on_models
+            and work_model not in component_class.apply_on_models
+        ):
             if len(component_class.apply_on_models) == 1:
-                hint_models = "'%s'" % (component_class.apply_on_models[0],)
+                hint_models = "'{}'".format(component_class.apply_on_models[0])
             else:
-                hint_models = "<one of %r>" % (
-                    component_class.apply_on_models,
-                )
+                hint_models = "<one of {!r}>".format(component_class.apply_on_models)
             raise NoComponentError(
                 "Component with name '%s' can't be used for model '%s'.\n"
                 "Hint: you might want to use: "
-                "component_by_name('%s', model_name=%s)" %
-                (name, work_model, name, hint_models)
+                "component_by_name('%s', model_name=%s)"
+                % (name, work_model, name, hint_models)
             )
 
         if work_model == self.model_name:
@@ -347,17 +346,59 @@ class WorkContext(object):
             work_context = self.work_on(model_name)
         return component_class(work_context)
 
-    def _lookup_components(self, usage=None, model_name=None):
+    def _lookup_components(self, usage=None, model_name=None, **kw):
         component_classes = self.components_registry.lookup(
-            self.collection._name,
-            usage=usage,
-            model_name=model_name,
+            self.collection._name, usage=usage, model_name=model_name
         )
+        matching_components = []
+        for cls in component_classes:
+            try:
+                matching = cls._component_match(
+                    self, usage=usage, model_name=model_name, **kw
+                )
+            except TypeError as err:
+                # Backward compat
+                _logger.info(str(err))
+                _logger.info(
+                    "The signature of %s._component_match has changed. "
+                    "Please, adapt your code as "
+                    "(self, usage=usage, model_name=model_name, **kw)",
+                    cls.__name__,
+                )
+                matching = cls._component_match(self)
+            if matching:
+                matching_components.append(cls)
+        return matching_components
 
-        return [cls for cls in component_classes if cls._component_match(self)]
+    def _filter_components_by_collection(self, component_classes):
+        return [c for c in component_classes if c._collection == self.collection._name]
 
-    def component(self, usage=None, model_name=None):
-        """ Find a component by usage and model for the current collection
+    def _filter_components_by_model(self, component_classes, model_name):
+        return [
+            c
+            for c in component_classes
+            if c.apply_on_models and model_name in c.apply_on_models
+        ]
+
+    def _ensure_model_name(self, model_name):
+        """Make sure model name is a string or fallback to current ctx value."""
+        if isinstance(model_name, models.BaseModel):
+            model_name = model_name._name
+        return model_name or self.model_name
+
+    def _matching_components(self, usage=None, model_name=None, **kw):
+        """Retrieve matching components and their work context."""
+        component_classes = self._lookup_components(
+            usage=usage, model_name=model_name, **kw
+        )
+        if model_name == self.model_name:
+            work_context = self
+        else:
+            work_context = self.work_on(model_name)
+        return component_classes, work_context
+
+    def component(self, usage=None, model_name=None, **kw):
+        """Find a component by usage and model for the current collection
 
         It searches a component using the rules of
         :meth:`ComponentRegistry.lookup`. When a component is found,
@@ -379,45 +420,40 @@ class WorkContext(object):
         if no component is found for the provided ``usage``/``model_name``.
 
         """
-        if isinstance(model_name, models.BaseModel):
-            model_name = model_name._name
-        model_name = model_name or self.model_name
-        component_classes = self._lookup_components(
-            usage=usage, model_name=model_name
+        model_name = self._ensure_model_name(model_name)
+        component_classes, work_context = self._matching_components(
+            usage=usage, model_name=model_name, **kw
         )
         if not component_classes:
             raise NoComponentError(
                 "No component found for collection '%s', "
-                "usage '%s', model_name '%s'." %
-                (self.collection._name, usage, model_name)
+                "usage '%s', model_name '%s'."
+                % (self.collection._name, usage, model_name)
             )
         elif len(component_classes) > 1:
             # If we have more than one component, try to find the one
             # specifically linked to the collection...
-            component_classes = [
-                c for c in component_classes
-                if c._collection == self.collection._name]
+            component_classes = self._filter_components_by_collection(component_classes)
         if len(component_classes) > 1:
             # ... or try to find the one specifically linked to the model
-            component_classes = [
-                c for c in component_classes
-                if c.apply_on_models and model_name in c.apply_on_models
-            ]
+            component_classes = self._filter_components_by_model(
+                component_classes, model_name
+            )
         if len(component_classes) != 1:
             raise SeveralComponentError(
                 "Several components found for collection '%s', "
-                "usage '%s', model_name '%s'. Found: %r" %
-                (self.collection._name, usage or '',
-                 model_name or '', component_classes)
+                "usage '%s', model_name '%s'. Found: %r"
+                % (
+                    self.collection._name,
+                    usage or "",
+                    model_name or "",
+                    component_classes,
+                )
             )
-        if model_name == self.model_name:
-            work_context = self
-        else:
-            work_context = self.work_on(model_name)
         return component_classes[0](work_context)
 
-    def many_components(self, usage=None, model_name=None):
-        """ Find many components by usage and model for the current collection
+    def many_components(self, usage=None, model_name=None, **kw):
+        """Find many components by usage and model for the current collection
 
         It searches a component using the rules of
         :meth:`ComponentRegistry.lookup`. When components are found, they
@@ -427,26 +463,20 @@ class WorkContext(object):
         If no component is found, an empty list is returned.
 
         """
-        if isinstance(model_name, models.BaseModel):
-            model_name = model_name._name
-        model_name = model_name or self.model_name
-        component_classes = self._lookup_components(
-            usage=usage, model_name=model_name
+        model_name = self._ensure_model_name(model_name)
+        component_classes, work_context = self._matching_components(
+            usage=usage, model_name=model_name, **kw
         )
-        if model_name == self.model_name:
-            work_context = self
-        else:
-            work_context = self.work_on(model_name)
         return [comp(work_context) for comp in component_classes]
 
     def __str__(self):
-        return "WorkContext(%s, %s)" % (self.model_name, repr(self.collection))
+        return "WorkContext({}, {})".format(self.model_name, repr(self.collection))
 
     __repr__ = __str__
 
 
 class MetaComponent(type):
-    """ Metaclass for Components
+    """Metaclass for Components
 
     Every new :class:`Component` will be added to ``_modules_components``,
     that will be used by the component builder.
@@ -455,10 +485,10 @@ class MetaComponent(type):
 
     _modules_components = defaultdict(list)
 
-    def __init__(self, name, bases, attrs):
-        if not self._register:
-            self._register = True
-            super(MetaComponent, self).__init__(name, bases, attrs)
+    def __init__(cls, name, bases, attrs):
+        if not cls._register:
+            cls._register = True
+            super().__init__(name, bases, attrs)
             return
 
         # If components are declared in tests, exclude them from the
@@ -469,27 +499,27 @@ class MetaComponent(type):
         # test creates a test components for the purpose of the test, then a
         # second tests uses the "load_components" to load all the addons of the
         # module: it will load the component of the previous test.
-        if 'tests' in self.__module__.split('.'):
+        if "tests" in cls.__module__.split("."):
             return
 
-        if not hasattr(self, '_module'):
-            self._module = _get_addon_name(self.__module__)
+        if not hasattr(cls, "_module"):
+            cls._module = _get_addon_name(cls.__module__)
 
-        self._modules_components[self._module].append(self)
+        cls._modules_components[cls._module].append(cls)
 
     @property
-    def apply_on_models(self):
+    def apply_on_models(cls):
         # None means all models
-        if self._apply_on is None:
+        if cls._apply_on is None:
             return None
         # always return a list, used for the lookup
-        elif isinstance(self._apply_on, str):
-            return [self._apply_on]
-        return self._apply_on
+        elif isinstance(cls._apply_on, str):
+            return [cls._apply_on]
+        return cls._apply_on
 
 
 class AbstractComponent(object, metaclass=MetaComponent):
-    """ Main Component Model
+    """Main Component Model
 
     All components have a Python inheritance either on
     :class:`AbstractComponent` or either on :class:`Component`.
@@ -662,12 +692,12 @@ class AbstractComponent(object, metaclass=MetaComponent):
     _usage = None
 
     def __init__(self, work_context):
-        super(AbstractComponent, self).__init__()
+        super().__init__()
         self.work = work_context
 
     @classmethod
-    def _component_match(cls, work):
-        """ Evaluated on candidate components
+    def _component_match(cls, work, usage=None, model_name=None, **kw):
+        """Evaluated on candidate components
 
         When a component lookup is done and candidate(s) have
         been found for a usage, a final call is done on this method.
@@ -688,39 +718,39 @@ class AbstractComponent(object, metaclass=MetaComponent):
 
     @property
     def collection(self):
-        """ Collection we are working with """
+        """Collection we are working with"""
         return self.work.collection
 
     @property
     def env(self):
-        """ Current Odoo environment, the one of the collection record """
+        """Current Odoo environment, the one of the collection record"""
         return self.work.env
 
     @property
     def model(self):
-        """ The model instance we are working with """
+        """The model instance we are working with"""
         return self.work.model
 
     def component_by_name(self, name, model_name=None):
-        """ Return a component by its name
+        """Return a component by its name
 
         Shortcut to meth:`~WorkContext.component_by_name`
         """
         return self.work.component_by_name(name, model_name=model_name)
 
-    def component(self, usage=None, model_name=None):
-        """ Return a component
+    def component(self, usage=None, model_name=None, **kw):
+        """Return a component
 
         Shortcut to meth:`~WorkContext.component`
         """
-        return self.work.component(usage=usage, model_name=model_name)
+        return self.work.component(usage=usage, model_name=model_name, **kw)
 
-    def many_components(self, usage=None, model_name=None):
-        """ Return several components
+    def many_components(self, usage=None, model_name=None, **kw):
+        """Return several components
 
         Shortcut to meth:`~WorkContext.many_components`
         """
-        return self.work.many_components(usage=usage, model_name=model_name)
+        return self.work.many_components(usage=usage, model_name=model_name, **kw)
 
     def __str__(self):
         return "Component(%s)" % self._name
@@ -729,7 +759,7 @@ class AbstractComponent(object, metaclass=MetaComponent):
 
     @classmethod
     def _build_component(cls, registry):
-        """ Instantiate a given Component in the components registry.
+        """Instantiate a given Component in the components registry.
 
         This method is called at the end of the Odoo's registry build.  The
         caller is :meth:`component.builder.ComponentBuilder.load_components`.
@@ -797,35 +827,39 @@ class AbstractComponent(object, metaclass=MetaComponent):
             parents = []
 
         if cls._name in registry and not parents:
-            raise TypeError('Component %r (in class %r) already exists. '
-                            'Consider using _inherit instead of _name '
-                            'or using a different _name.' % (cls._name, cls))
+            raise TypeError(
+                "Component %r (in class %r) already exists. "
+                "Consider using _inherit instead of _name "
+                "or using a different _name." % (cls._name, cls)
+            )
 
         # determine the component's name
         name = cls._name or (len(parents) == 1 and parents[0])
 
         if not name:
-            raise TypeError('Component %r must have a _name' % cls)
+            raise TypeError("Component %r must have a _name" % cls)
 
         # all components except 'base' implicitly inherit from 'base'
-        if name != 'base':
-            parents = list(parents) + ['base']
+        if name != "base":
+            parents = list(parents) + ["base"]
 
         # create or retrieve the component's class
         if name in parents:
             if name not in registry:
-                raise TypeError("Component %r does not exist in registry." %
-                                name)
+                raise TypeError("Component %r does not exist in registry." % name)
             ComponentClass = registry[name]
             ComponentClass._build_component_check_base(cls)
             check_parent = ComponentClass._build_component_check_parent
         else:
             ComponentClass = type(
-                name, (AbstractComponent,),
-                {'_name': name,
-                 '_register': False,
-                 # names of children component
-                 '_inherit_children': OrderedSet()},
+                name,
+                (AbstractComponent,),
+                {
+                    "_name": name,
+                    "_register": False,
+                    # names of children component
+                    "_inherit_children": OrderedSet(),
+                },
             )
             check_parent = cls._build_component_check_parent
 
@@ -834,8 +868,8 @@ class AbstractComponent(object, metaclass=MetaComponent):
         for parent in parents:
             if parent not in registry:
                 raise TypeError(
-                    "Component %r inherits from non-existing component %r." %
-                    (name, parent)
+                    "Component %r inherits from non-existing component %r."
+                    % (name, parent)
                 )
             parent_class = registry[parent]
             if parent == name:
@@ -855,28 +889,29 @@ class AbstractComponent(object, metaclass=MetaComponent):
 
     @classmethod
     def _build_component_check_base(cls, extend_cls):
-        """ Check whether ``cls`` can be extended with ``extend_cls``. """
+        """Check whether ``cls`` can be extended with ``extend_cls``."""
         if cls._abstract and not extend_cls._abstract:
-            msg = ("%s transforms the abstract component %r into a "
-                   "non-abstract component. "
-                   "That class should either inherit from AbstractComponent, "
-                   "or set a different '_name'.")
+            msg = (
+                "%s transforms the abstract component %r into a "
+                "non-abstract component. "
+                "That class should either inherit from AbstractComponent, "
+                "or set a different '_name'."
+            )
             raise TypeError(msg % (extend_cls, cls._name))
 
     @classmethod
-    def _build_component_check_parent(component_class, cls, parent_class):
-        """ Check whether ``model_class`` can inherit from ``parent_class``.
-        """
+    def _build_component_check_parent(component_class, cls, parent_class):  # noqa: B902
+        """Check whether ``model_class`` can inherit from ``parent_class``."""
         if component_class._abstract and not parent_class._abstract:
-            msg = ("In %s, the abstract Component %r cannot inherit "
-                   "from the non-abstract Component %r.")
-            raise TypeError(
-                msg % (cls, component_class._name, parent_class._name)
+            msg = (
+                "In %s, the abstract Component %r cannot inherit "
+                "from the non-abstract Component %r."
             )
+            raise TypeError(msg % (cls, component_class._name, parent_class._name))
 
     @classmethod
     def _complete_component_build(cls):
-        """ Complete build of the new component class
+        """Complete build of the new component class
 
         After the component has been built from its bases, this method is
         called, and can be used to customize the class before it can be used.
@@ -887,7 +922,7 @@ class AbstractComponent(object, metaclass=MetaComponent):
 
 
 class Component(AbstractComponent):
-    """ Concrete Component class
+    """Concrete Component class
 
     This is the class you inherit from when you want your component to
     be registered in the component collections.
@@ -895,5 +930,6 @@ class Component(AbstractComponent):
     Look in :class:`AbstractComponent` for more details.
 
     """
+
     _register = False
     _abstract = False

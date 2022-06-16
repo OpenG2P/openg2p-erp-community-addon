@@ -1,14 +1,13 @@
 # Copyright 2018 ACSONE SA/NV
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-import inspect
 import logging
 from contextlib import contextmanager
-from urllib.parse import urljoin
 
 from werkzeug.exceptions import BadRequest
 
-from odoo.http import Controller, ControllerType, Response, request, route
+from odoo import models
+from odoo.http import Controller, ControllerType, Response, request
 
 from odoo.addons.component.core import WorkContext, _get_addon_name
 
@@ -18,11 +17,12 @@ _logger = logging.getLogger(__name__)
 
 
 class _PseudoCollection(object):
-    __slots__ = "_name", "env"
+    __slots__ = "_name", "env", "id"
 
     def __init__(self, name, env):
         self._name = name
         self.env = env
+        self.id = None
 
 
 class RestControllerType(ControllerType):
@@ -38,141 +38,112 @@ class RestControllerType(ControllerType):
             # our RestConrtroller must be a direct child of Controller
             bases += (Controller,)
         super(RestControllerType, cls).__init__(name, bases, attrs)
-        if "RestController" not in globals() or RestController not in bases:
+        if "RestController" not in globals() or not any(
+            issubclass(b, RestController) for b in bases
+        ):
             return
         # register the rest controller into the rest controllers registry
         root_path = getattr(cls, "_root_path", None)
         collection_name = getattr(cls, "_collection_name", None)
         if root_path and collection_name:
-            if not hasattr(cls, "_module"):
-                cls._module = _get_addon_name(cls.__module__)
+            cls._module = _get_addon_name(cls.__module__)
             _rest_controllers_per_module[cls._module].append(
-                {"root_path": root_path, "collection_name": collection_name}
+                {
+                    "root_path": root_path,
+                    "collection_name": collection_name,
+                    "controller_class": cls,
+                }
             )
-
-    @classmethod
-    def _add_default_methods(cls, bases, members):
-        if "RestController" in globals() and RestController in bases:
-
-            @route(
-                [
-                    "<string:_service_name>",
-                    "<string:_service_name>/search",
-                    "<string:_service_name>/<int:_id>",
-                    "<string:_service_name>/<int:_id>/get",
-                ],
-                methods=["GET"],
+            _logger.debug(
+                "Added rest controller %s for module %s",
+                _rest_controllers_per_module[cls._module][-1],
+                cls._module,
             )
-            def get(self, _service_name, _id=None, **params):
-                method_name = "get" if _id else "search"
-                return self._process_method(_service_name, method_name, _id, params)
-
-            @route(
-                [
-                    "<string:_service_name>",
-                    "<string:_service_name>/<string:method_name>",
-                    "<string:_service_name>/<int:_id>",
-                    "<string:_service_name>/<int:_id>/<string:method_name>",
-                ],
-                methods=["POST"],
-            )
-            def modify(self, _service_name, _id=None, method_name=None, **params):
-                if not method_name:
-                    method_name = "update" if _id else "create"
-                if method_name == "get":
-                    _logger.error(
-                        "HTTP POST with method name 'get' is not allowed. "
-                        "(service name: %s)",
-                        _service_name,
-                    )
-                    raise BadRequest()
-                return self._process_method(_service_name, method_name, _id, params)
-
-            @route(["<string:_service_name>/<int:_id>"], methods=["PUT"])
-            def update(self, _service_name, _id, **params):
-                return self._process_method(_service_name, "update", _id, params)
-
-            @route(["<string:_service_name>/<int:_id>"], methods=["DELETE"])
-            def delete(self, _service_name, _id):
-                return self._process_method(_service_name, "delete", _id)
-
-            members.update(
-                {"get": get, "modify": modify, "update": update, "delete": delete}
-            )
-
-    @classmethod
-    def _prepend_route_path(cls, klass):
-        """Add the root path to all the route defined by the controller"""
-        if not klass._root_path:
-            return
-        # Add the root_path to the routes defined into the controller
-        for member in inspect.getmembers(klass, predicate=inspect.isfunction):
-            method = member[1]
-            if (
-                not hasattr(method, "original_func")
-                or "rest_routes_patched" in method.routing
-            ):
-                continue
-            routing = method.routing
-            routes = routing.get("routes")
-            patched_routes = []
-            for _route in routes:
-                patched_routes.append(urljoin(klass._root_path, _route))
-            routing["routes"] = patched_routes
-            methods = routing["methods"]
-            if "auth" not in routing:
-                auth = klass._default_auth
-                if len(methods) == 1:
-                    method = methods[0]
-                    if method in klass._auth_by_method:
-                        auth = klass._auth_by_method[method]
-                routing["auth"] = auth
-            if "cors" not in routing:
-                routing["cors"] = klass._cors
-            if "csrf" not in routing:
-                routing["csrf"] = klass._csrf
-            routing["rest_routes_patched"] = True
-
-    def __new__(cls, name, bases, members):
-        # concrete RestController Factory
-        RestControllerType._add_default_methods(bases, members)
-        # we create our concrete controller
-        klass = type.__new__(cls, name, bases, members)
-        RestControllerType._prepend_route_path(klass)
-        return klass
 
 
 class RestController(Controller, metaclass=RestControllerType):
     """Generic REST Controller
 
-    This controller provides generic routes conform to commen REST usages.
-    You must inherit of this controller into your code to register your REST
-    routes. At the same time you must fill 2 required informations:
+    This controller is the base controller used by as base controller for all the REST
+    controller generated from the service components.
+
+    You must inherit of this controller into your code to register the root path
+    used to serve all the services defined for the given collection name.
+    This registration requires 2 parameters:
 
     _root_path:
     _collection_name:
 
+    Only one controller by _collection_name, _root_path should exists into an
+    odoo database. If more than one controller exists, a warning is issued into
+    the log at startup and the concrete controller used as base class
+    for the services registered into the collection name and served at the
+    root path is not predictable.
+
+    Module A:
+        class ControllerA(RestController):
+            _root_path='/my_path/'
+            _collection_name='my_services_collection'
+
+    Module B depends A:                               A
+        class ControllerB(ControllerA):             /  \
+            pass                                   B    C
+                                                  /
+    Module C depends A:                          D
+        class ControllerC(ControllerA):
+            pass
+
+    Module D depends B:
+        class ControllerB(ControllerB):
+            pass
+
+    In the preceding illustration, services in module C will never be served
+    by controller D or B. Therefore if the generic dispatch method is overridden
+    in  B or D, this override wil never apply to services in C since in Odoo
+    controllers are not designed to be inherited. That's why it's an error
+    to have more than one controller registered for the same root path and
+    collection name.
+
+    The following properties can be specified to define common properties to
+    apply to generated REST routes.
+
+    _default_auth: The default authentication to apply to all pre defined routes.
+                    default: 'user'
+    _default_cors: The default Access-Control-Allow-Origin cors directive value.
+                   default: None
+    _default_csrf: Whether CSRF protection should be enabled for the route.
+                   default: False
+    _default_save_session: Whether session should be saved into the session store
+                           default: True
     """
 
     _root_path = None
     _collection_name = None
     # The default authentication to apply to all pre defined routes.
     _default_auth = "user"
-    # You can use this parameter to specify an authentication method by HTTP
-    # method ie: {'GET': None, 'POST': 'user'}
-    _auth_by_method = {}
-    # The default The Access-Control-Allow-Origin cors directive value.
-    _cors = None
+    # The default Access-Control-Allow-Origin cors directive value.
+    _default_cors = None
     # Whether CSRF protection should be enabled for the route.
-    _csrf = False
+    _default_csrf = False
+    # Whether session should be saved into the session store
+    _default_save_session = True
 
-    def _get_component_context(self):
+    _component_context_provider = "component_context_provider"
+
+    def _get_component_context(self, collection=None):
         """
         This method can be inherited to add parameter into the component
         context
         :return: dict of key value.
         """
-        return {"request": request}
+        work = WorkContext(
+            model_name="rest.service.registration",
+            collection=collection or self.default_collection,
+            request=request,
+            controller=self,
+        )
+        provider = work.component(usage=self._component_context_provider)
+        return provider._get_component_context()
 
     def make_response(self, data):
         if isinstance(data, Response):
@@ -186,32 +157,37 @@ class RestController(Controller, metaclass=RestControllerType):
         return self._collection_name
 
     @property
-    def collection(self):
+    def default_collection(self):
         return _PseudoCollection(self.collection_name, request.env)
 
     @contextmanager
-    def work_on_component(self):
+    def work_on_component(self, collection=None):
         """
         Return the component that implements the methods of the requested
         service.
         :param service_name:
         :return: an instance of base.rest.service component
         """
-        collection = self.collection
-        params = self._get_component_context()
-        yield WorkContext(
-            model_name="rest.service.registration", collection=collection, **params
+        collection = collection or self.default_collection
+        component_ctx = self._get_component_context(collection=collection)
+        env = collection.env
+        collection.env = env(
+            context=dict(
+                env.context,
+                authenticated_partner_id=component_ctx.get("authenticated_partner_id"),
+            )
         )
+        yield WorkContext(model_name="rest.service.registration", **component_ctx)
 
     @contextmanager
-    def service_component(self, service_name):
+    def service_component(self, service_name, collection=None):
         """
         Return the component that implements the methods of the requested
         service.
         :param service_name:
         :return: an instance of base.rest.service component
         """
-        with self.work_on_component() as work:
+        with self.work_on_component(collection=collection) as work:
             service = work.component(usage=service_name)
             yield service
 
@@ -225,8 +201,12 @@ class RestController(Controller, metaclass=RestControllerType):
             raise BadRequest()
         return True
 
-    def _process_method(self, service_name, method_name, _id=None, params=None):
+    def _process_method(
+        self, service_name, method_name, *args, collection=None, params=None
+    ):
         self._validate_method_name(method_name)
-        with self.service_component(service_name) as service:
-            result = service.dispatch(method_name, _id, params)
+        if isinstance(collection, models.Model) and not collection:
+            raise request.not_found()
+        with self.service_component(service_name, collection=collection) as service:
+            result = service.dispatch(method_name, *args, params=params)
             return self.make_response(result)

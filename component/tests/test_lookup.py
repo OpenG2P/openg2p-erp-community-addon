@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
-from odoo.addons.component.core import (
-    AbstractComponent,
-    Component,
-)
-from .common import ComponentRegistryCase
+from odoo.addons.component.core import AbstractComponent, Component
+
+from .common import TransactionComponentRegistryCase
 
 
-class TestLookup(ComponentRegistryCase):
-    """ Test the ComponentRegistry
+class TestLookup(TransactionComponentRegistryCase):
+    """Test the ComponentRegistry
 
     Tests in this testsuite mainly do:
 
@@ -26,86 +23,80 @@ class TestLookup(ComponentRegistryCase):
     """
 
     def test_lookup_collection(self):
-        """ Lookup components of a collection """
+        """Lookup components of a collection"""
         # we register 2 components in foobar and one in other
         class Foo(Component):
-            _name = 'foo'
-            _collection = 'foobar'
+            _name = "foo"
+            _collection = "foobar"
 
         class Bar(Component):
-            _name = 'bar'
-            _collection = 'foobar'
+            _name = "bar"
+            _collection = "foobar"
 
         class Homer(Component):
-            _name = 'homer'
-            _collection = 'other'
+            _name = "homer"
+            _collection = "other"
 
         self._build_components(Foo, Bar, Homer)
 
         # we should no see the component in 'other'
-        components = self.comp_registry.lookup('foobar')
-        self.assertEqual(
-            ['foo', 'bar'],
-            [c._name for c in components]
-        )
+        components = self.comp_registry.lookup("foobar")
+        self.assertEqual(["foo", "bar"], [c._name for c in components])
 
     def test_lookup_usage(self):
-        """ Lookup components by usage """
+        """Lookup components by usage"""
+
         class Foo(Component):
-            _name = 'foo'
-            _collection = 'foobar'
-            _usage = 'speaker'
+            _name = "foo"
+            _collection = "foobar"
+            _usage = "speaker"
 
         class Bar(Component):
-            _name = 'bar'
-            _collection = 'foobar'
-            _usage = 'speaker'
+            _name = "bar"
+            _collection = "foobar"
+            _usage = "speaker"
 
         class Baz(Component):
-            _name = 'baz'
-            _collection = 'foobar'
-            _usage = 'listener'
+            _name = "baz"
+            _collection = "foobar"
+            _usage = "listener"
 
         self._build_components(Foo, Bar, Baz)
 
-        components = self.comp_registry.lookup('foobar', usage='listener')
-        self.assertEqual('baz', components[0]._name)
+        components = self.comp_registry.lookup("foobar", usage="listener")
+        self.assertEqual("baz", components[0]._name)
 
-        components = self.comp_registry.lookup('foobar', usage='speaker')
-        self.assertEqual(
-            ['foo', 'bar'],
-            [c._name for c in components]
-        )
+        components = self.comp_registry.lookup("foobar", usage="speaker")
+        self.assertEqual(["foo", "bar"], [c._name for c in components])
 
     def test_lookup_no_component(self):
-        """ No component """
+        """No component"""
         # we just expect an empty list when no component match, the error
         # handling is handled at an higher level
-        self.assertEqual(
-            [],
-            self.comp_registry.lookup('something', usage='something')
-        )
+        self.assertEqual([], self.comp_registry.lookup("something", usage="something"))
 
     def test_get_by_name(self):
-        """ Get component by name """
+        """Get component by name"""
+
         class Foo(AbstractComponent):
-            _name = 'foo'
-            _collection = 'foobar'
+            _name = "foo"
+            _collection = "foobar"
 
         self._build_components(Foo)
         # this is just a dict access
-        self.assertEqual('foo', self.comp_registry['foo']._name)
+        self.assertEqual("foo", self.comp_registry["foo"]._name)
 
     def test_lookup_abstract(self):
-        """ Do not include abstract components in lookup """
+        """Do not include abstract components in lookup"""
+
         class Foo(AbstractComponent):
-            _name = 'foo'
-            _collection = 'foobar'
-            _usage = 'speaker'
+            _name = "foo"
+            _collection = "foobar"
+            _usage = "speaker"
 
         class Bar(Component):
-            _name = 'bar'
-            _inherit = 'foo'
+            _name = "bar"
+            _inherit = "foo"
 
         self._build_components(Foo, Bar)
 
@@ -113,70 +104,69 @@ class TestLookup(ComponentRegistryCase):
 
         # we should never have 'foo' in the returned components
         # as it is abstract
-        components = comp_registry.lookup('foobar', usage='speaker')
-        self.assertEqual('bar', components[0]._name)
+        components = comp_registry.lookup("foobar", usage="speaker")
+        self.assertEqual("bar", components[0]._name)
 
-        components = comp_registry.lookup('foobar', usage='speaker')
-        self.assertEqual(
-            ['bar'],
-            [c._name for c in components]
-        )
+        components = comp_registry.lookup("foobar", usage="speaker")
+        self.assertEqual(["bar"], [c._name for c in components])
 
     def test_lookup_model_name(self):
-        """ Lookup with model names """
+        """Lookup with model names"""
+
         class Foo(Component):
-            _name = 'foo'
-            _collection = 'foobar'
-            _usage = 'speaker'
+            _name = "foo"
+            _collection = "foobar"
+            _usage = "speaker"
             # support list
-            _apply_on = ['res.partner']
+            _apply_on = ["res.partner"]
 
         class Bar(Component):
-            _name = 'bar'
-            _collection = 'foobar'
-            _usage = 'speaker'
+            _name = "bar"
+            _collection = "foobar"
+            _usage = "speaker"
             # support string
-            _apply_on = 'res.users'
+            _apply_on = "res.users"
 
         class Any(Component):
             # can be used with any model as far as we look it up
             # with its usage
-            _name = 'any'
-            _collection = 'foobar'
-            _usage = 'listener'
+            _name = "any"
+            _collection = "foobar"
+            _usage = "listener"
 
         self._build_components(Foo, Bar, Any)
 
-        components = self.comp_registry.lookup('foobar',
-                                               usage='speaker',
-                                               model_name='res.partner')
-        self.assertEqual('foo', components[0]._name)
+        components = self.comp_registry.lookup(
+            "foobar", usage="speaker", model_name="res.partner"
+        )
+        self.assertEqual("foo", components[0]._name)
 
-        components = self.comp_registry.lookup('foobar',
-                                               usage='speaker',
-                                               model_name='res.users')
-        self.assertEqual('bar', components[0]._name)
+        components = self.comp_registry.lookup(
+            "foobar", usage="speaker", model_name="res.users"
+        )
+        self.assertEqual("bar", components[0]._name)
 
-        components = self.comp_registry.lookup('foobar',
-                                               usage='listener',
-                                               model_name='res.users')
-        self.assertEqual('any', components[0]._name)
+        components = self.comp_registry.lookup(
+            "foobar", usage="listener", model_name="res.users"
+        )
+        self.assertEqual("any", components[0]._name)
 
     def test_lookup_cache(self):
-        """ Lookup uses a cache """
+        """Lookup uses a cache"""
+
         class Foo(Component):
-            _name = 'foo'
-            _collection = 'foobar'
+            _name = "foo"
+            _collection = "foobar"
 
         self._build_components(Foo)
 
-        components = self.comp_registry.lookup('foobar')
-        self.assertEqual(['foo'], [c._name for c in components])
+        components = self.comp_registry.lookup("foobar")
+        self.assertEqual(["foo"], [c._name for c in components])
 
         # we add a new component
         class Bar(Component):
-            _name = 'bar'
-            _collection = 'foobar'
+            _name = "bar"
+            _collection = "foobar"
 
         self._build_components(Bar)
 
@@ -185,10 +175,10 @@ class TestLookup(ComponentRegistryCase):
         # We do this for testing, but in a real use case, we can't
         # add new Component classes on the fly, and when we install
         # new addons, the registry is rebuilt and cache cleared.
-        components = self.comp_registry.lookup('foobar')
-        self.assertEqual(['foo'], [c._name for c in components])
+        components = self.comp_registry.lookup("foobar")
+        self.assertEqual(["foo"], [c._name for c in components])
 
         self.comp_registry._cache.clear()
         # now we should find them both as the cache has been cleared
-        components = self.comp_registry.lookup('foobar')
-        self.assertEqual(['foo', 'bar'], [c._name for c in components])
+        components = self.comp_registry.lookup("foobar")
+        self.assertEqual(["foo", "bar"], [c._name for c in components])

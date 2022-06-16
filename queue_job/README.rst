@@ -14,13 +14,13 @@ Job Queue
     :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fqueue-lightgray.png?logo=github
-    :target: https://github.com/OCA/queue/tree/12.0/queue_job
+    :target: https://github.com/OCA/queue/tree/14.0/queue_job
     :alt: OCA/queue
 .. |badge4| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
-    :target: https://translation.odoo-community.org/projects/queue-12-0/queue-12-0-queue_job
+    :target: https://translation.odoo-community.org/projects/queue-14-0/queue-14-0-queue_job
     :alt: Translate me on Weblate
 .. |badge5| image:: https://img.shields.io/badge/runbot-Try%20me-875A7B.png
-    :target: https://runbot.odoo-community.org/runbot/230/12.0
+    :target: https://runbot.odoo-community.org/runbot/230/14.0
     :alt: Try me on Runbot
 
 |badge1| |badge2| |badge3| |badge4| |badge5| 
@@ -36,13 +36,10 @@ Example:
 .. code-block:: python
 
   from odoo import models, fields, api
-  from odoo.addons.queue_job.job import job
 
   class MyModel(models.Model):
      _name = 'my.model'
 
-     @api.multi
-     @job
      def my_method(self, a, k=None):
          _logger.info('executed with a: %s and k: %s', a, k)
 
@@ -50,13 +47,12 @@ Example:
   class MyOtherModel(models.Model):
       _name = 'my.other.model'
 
-      @api.multi
       def button_do_stuff(self):
           self.env['my.model'].with_delay().my_method('a', k=2)
 
 
-In the snippet of code above, when we call ``button_do_stuff``, a job capturing
-the method and arguments will be postponed.  It will be executed as soon as the
+In the snippet of code above, when we call ``button_do_stuff``, a job **capturing
+the method and arguments** will be postponed.  It will be executed as soon as the
 Jobrunner has a free bucket, which can be instantaneous if no other job is
 running.
 
@@ -93,7 +89,7 @@ Configuration
 
   * Adjust environment variables (optional):
 
-    - ``ODOO_QUEUE_JOB_CHANNELS=root:4`` or any other channels configuration. 
+    - ``ODOO_QUEUE_JOB_CHANNELS=root:4`` or any other channels configuration.
       The default is ``root:1``
 
     - if ``xmlrpc_port`` is not set: ``ODOO_QUEUE_JOB_PORT=8069``
@@ -143,6 +139,126 @@ To use this module, you need to:
 Developers
 ~~~~~~~~~~
 
+**Configure default options for jobs**
+
+In earlier versions, jobs could be configured using the ``@job`` decorator.
+This is now obsolete, they can be configured using optional ``queue.job.function``
+and ``queue.job.channel`` XML records.
+
+Example of channel:
+
+.. code-block:: XML
+
+    <record id="channel_sale" model="queue.job.channel">
+        <field name="name">sale</field>
+        <field name="parent_id" ref="queue_job.channel_root" />
+    </record>
+
+Example of job function:
+
+.. code-block:: XML
+
+    <record id="job_function_sale_order_action_done" model="queue.job.function">
+        <field name="model_id" ref="sale.model_sale_order" />
+        <field name="method">action_done</field>
+        <field name="channel_id" ref="channel_sale" />
+        <field name="related_action" eval='{"func_name": "custom_related_action"}' />
+        <field name="retry_pattern" eval="{1: 60, 2: 180, 3: 10, 5: 300}" />
+    </record>
+
+The general form for the ``name`` is: ``<model.name>.method``.
+
+The channel, related action and retry pattern options are optional, they are
+documented below.
+
+When writing modules, if 2+ modules add a job function or channel with the same
+name (and parent for channels), they'll be merged in the same record, even if
+they have different xmlids. On uninstall, the merged record is deleted when all
+the modules using it are uninstalled.
+
+
+**Job function: model**
+
+If the function is defined in an abstract model, you can not write
+``<field name="model_id" ref="xml_id_of_the_abstract_model"</field>``
+but you have to define a function for each model that inherits from the abstract model.
+
+
+**Job function: channel**
+
+The channel where the job will be delayed. The default channel is ``root``.
+
+**Job function: related action**
+
+The *Related Action* appears as a button on the Job's view.
+The button will execute the defined action.
+
+The default one is to open the view of the record related to the job (form view
+when there is a single record, list view for several records).
+In many cases, the default related action is enough and doesn't need
+customization, but it can be customized by providing a dictionary on the job
+function:
+
+.. code-block:: python
+
+   {
+       "enable": False,
+       "func_name": "related_action_partner",
+       "kwargs": {"name": "Partner"},
+   }
+
+* ``enable``: when ``False``, the button has no effect (default: ``True``)
+* ``func_name``: name of the method on ``queue.job`` that returns an action
+* ``kwargs``: extra arguments to pass to the related action method
+
+Example of related action code:
+
+.. code-block:: python
+
+    class QueueJob(models.Model):
+        _inherit = 'queue.job'
+
+        def related_action_partner(self, name):
+            self.ensure_one()
+            model = self.model_name
+            partner = self.records
+            action = {
+                'name': name,
+                'type': 'ir.actions.act_window',
+                'res_model': model,
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_id': partner.id,
+            }
+            return action
+
+
+**Job function: retry pattern**
+
+When a job fails with a retryable error type, it is automatically
+retried later. By default, the retry is always 10 minutes later.
+
+A retry pattern can be configured on the job function. What a pattern represents
+is "from X tries, postpone to Y seconds". It is expressed as a dictionary where
+keys are tries and values are seconds to postpone as integers:
+
+
+.. code-block:: python
+
+   {
+       1: 10,
+       5: 20,
+       10: 30,
+       15: 300,
+   }
+
+Based on this configuration, we can tell that:
+
+* 5 first retries are postponed 10 seconds later
+* retries 5 to 10 postponed 20 seconds later
+* retries 10 to 15 postponed 30 seconds later
+* all subsequent retries postponed 5 minutes later
+
 **Bypass jobs on running Odoo**
 
 When you are developing (ie: connector modules) you might want
@@ -171,19 +287,6 @@ Tip: you can do this at test case level like this
 Then all your tests execute the job methods synchronously
 without delaying any jobs.
 
-Tips and tricks
-~~~~~~~~~~~~~~~
-
-* **Idempotency** (https://www.restapitutorial.com/lessons/idempotency.html): The queue_job should be idempotent so they can be retried several times without impact on the data.
-* **The job should test at the very beginning its relevance**: the moment the job will be executed is unknown by design. So the first task of a job should be to check if the related work is still relevant at the moment of the execution.
-
-Patterns
-~~~~~~~~
-Through the time, two main patterns emerged:
-
-1. For data exposed to users, a model should store the data and the model should be the creator of the job. The job is kept hidden from the users
-2. For technical data, that are not exposed to the users, it is generally alright to create directly jobs with data passed as arguments to the job, without intermediary models.
-
 Known issues / Roadmap
 ======================
 
@@ -206,7 +309,6 @@ Known issues / Roadmap
 
   update queue_job set state='pending' where state in ('started', 'enqueued')
 
-
 Changelog
 =========
 
@@ -214,7 +316,7 @@ Changelog
     understand changes between version. The primary audience is
     end users and integrators. Purely technical changes such as
     code refactoring must not be mentioned here.
-    
+
     This file may contain ONE level of section titles, underlined
     with the ~ (tilde) character. Other section markers are
     forbidden and will likely break the structure of the README.rst
@@ -223,32 +325,11 @@ Changelog
 Next
 ~~~~
 
-12.0.1.1.0 (2019-11-01)
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Important: the license has been changed from AGPL3 to LGPL3.
-
-* [IMP] Dont' start the Jobrunner if root channel's capacity
-  is explicitly set to 0
-* [ADD] Ability to set several jobs to done using an multi-action
-  (port of `#59 <https://github.com/OCA/queue/pull/59>`_)
-* [REF] Extract a method handling the post of a message when a job is failed,
-  allowing to modify this behavior from addons
-* [ADD] Allow Jobrunner configuration from server_environment
-  (details on `#124 <https://github.com/OCA/queue/pull/124>`_)
-* [ADD] Environment variable ``TEST_QUEUE_JOB_NO_DELAY=1`` for test and debug
-  (details on `#114 <https://github.com/OCA/queue/pull/114>`_)
-* [FIX] race condition under pressure, when starting a job takes more than 1 second
-  (details on `#131 <https://github.com/OCA/queue/pull/131>`_)
-* [FIX] ``retry_postone`` on a job could be rollbacked on errors
-  (details on `#130 <https://github.com/OCA/queue/pull/130>`_)
-* [FIX] Autovacuum cron job misconfiguration
-  (details on `#163 <https://github.com/OCA/queue/pull/163>`_)
-
-12.0.1.0.0 (2018-10-02)
-~~~~~~~~~~~~~~~~~~~~~~~
-
-* [MIGRATION] from 11.0 branched at rev. b0945be
+* [ADD] Run jobrunner as a worker process instead of a thread in the main
+  process (when running with --workers > 0)
+* [REF] ``@job`` and ``@related_action`` deprecated, any method can be delayed,
+  and configured using ``queue.job.function`` records
+* [MIGRATION] from 13.0 branched at rev. e24ff4b
 
 Bug Tracker
 ===========
@@ -256,7 +337,7 @@ Bug Tracker
 Bugs are tracked on `GitHub Issues <https://github.com/OCA/queue/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us smashing it by providing a detailed and welcomed
-`feedback <https://github.com/OCA/queue/issues/new?body=module:%20queue_job%0Aversion:%2012.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/OCA/queue/issues/new?body=module:%20queue_job%0Aversion:%2014.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -280,6 +361,10 @@ Contributors
 * Laurent Mignon <laurent.mignon@acsone.eu>
 * Laetitia Gangloff <laetitia.gangloff@acsone.eu>
 * Cédric Pigeon <cedric.pigeon@acsone.eu>
+* Tatiana Deribina <tatiana.deribina@avoin.systems>
+* Souheil Bejaoui <souheil.bejaoui@acsone.eu>
+* Eric Antones <eantones@nuobit.com>
+* Simone Orsi <simone.orsi@camptocamp.com>
 
 Maintainers
 ~~~~~~~~~~~
@@ -302,6 +387,6 @@ Current `maintainer <https://odoo-community.org/page/maintainer-role>`__:
 
 |maintainer-guewen| 
 
-This module is part of the `OCA/queue <https://github.com/OCA/queue/tree/12.0/queue_job>`_ project on GitHub.
+This module is part of the `OCA/queue <https://github.com/OCA/queue/tree/14.0/queue_job>`_ project on GitHub.
 
 You are welcome to contribute. To learn how please visit https://odoo-community.org/page/Contribute.

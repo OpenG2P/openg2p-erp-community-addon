@@ -4,6 +4,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 import datetime
+import decimal
 import json
 import logging
 import sys
@@ -20,6 +21,7 @@ from werkzeug.exceptions import (
 )
 from werkzeug.utils import escape
 
+import odoo
 from odoo.exceptions import (
     AccessDenied,
     AccessError,
@@ -31,7 +33,7 @@ from odoo.http import HttpRequest, Root, SessionExpiredException, request
 from odoo.tools import ustr
 from odoo.tools.config import config
 
-from .core import _rest_services_databases
+from .core import _rest_services_routes
 
 _logger = logging.getLogger(__name__)
 
@@ -48,12 +50,18 @@ class JSONEncoder(json.JSONEncoder):
             return obj.isoformat()
         elif isinstance(obj, datetime.date):
             return obj.isoformat()
+        elif isinstance(obj, decimal.Decimal):
+            return float(obj)
         return super(JSONEncoder, self).default(obj)
 
 
-def wrapJsonException(exception, include_description=False):
-    """Wrapper method that modify the exception in order
-    to render it like a json"""
+def wrapJsonException(exception, include_description=False, extra_info=None):
+    """Wrap exceptions to be rendered as JSON.
+
+    :param exception: an instance of an exception
+    :param include_description: include full description in payload
+    :param extra_info: dict to provide extra keys to include in payload
+    """
 
     get_original_headers = exception.get_headers
     exception.traceback = "".join(traceback.format_exception(*sys.exc_info()))
@@ -66,6 +74,7 @@ def wrapJsonException(exception, include_description=False):
             res.update({"traceback": exception.traceback, "description": description})
         elif include_description:
             res["description"] = description
+        res.update(extra_info or {})
         return JSONEncoder().encode(res)
 
     def get_headers(environ=None):
@@ -107,7 +116,12 @@ class HttpRestRequest(HttpRequest):
         super(HttpRestRequest, self).__init__(httprequest)
         if self.httprequest.mimetype == "application/json":
             data = self.httprequest.get_data().decode(self.httprequest.charset)
-            self.params = json.loads(data)
+            try:
+                self.params = json.loads(data)
+            except ValueError as e:
+                msg = "Invalid JSON data: %s" % str(e)
+                _logger.info("%s: %s", self.httprequest.path, msg)
+                raise BadRequest(msg)
         else:
             # We reparse the query_string in order to handle data structure
             # more information on https://github.com/aventurella/pyquerystring
@@ -158,24 +172,31 @@ class HttpRestRequest(HttpRequest):
 
     def _handle_exception(self, exception):
         """Called within an except block to allow converting exceptions
-           to abitrary responses. Anything returned (except None) will
-           be used as response."""
+        to abitrary responses. Anything returned (except None) will
+        be used as response."""
         if isinstance(exception, SessionExpiredException):
             # we don't want to return the login form as plain html page
             # we want to raise a proper exception
             return wrapJsonException(Unauthorized(ustr(exception)))
         try:
             return super(HttpRestRequest, self)._handle_exception(exception)
-        except (UserError, ValidationError) as e:
-            return wrapJsonException(BadRequest(e.name), include_description=True)
         except MissingError as e:
-            return wrapJsonException(NotFound(ustr(e)))
+            extra_info = getattr(e, "rest_json_info", None)
+            return wrapJsonException(NotFound(ustr(e)), extra_info=extra_info)
         except (AccessError, AccessDenied) as e:
-            return wrapJsonException(Forbidden(ustr(e)))
+            extra_info = getattr(e, "rest_json_info", None)
+            return wrapJsonException(Forbidden(ustr(e)), extra_info=extra_info)
+        except (UserError, ValidationError) as e:
+            extra_info = getattr(e, "rest_json_info", None)
+            return wrapJsonException(
+                BadRequest(e.args[0]), include_description=True, extra_info=extra_info
+            )
         except HTTPException as e:
-            return wrapJsonException(e)
+            extra_info = getattr(e, "rest_json_info", None)
+            return wrapJsonException(e, extra_info=extra_info)
         except Exception as e:  # flake8: noqa: E722
-            return wrapJsonException(InternalServerError(e))
+            extra_info = getattr(e, "rest_json_info", None)
+            return wrapJsonException(InternalServerError(e), extra_info=extra_info)
 
     def make_json_response(self, data, headers=None, cookies=None):
         data = JSONEncoder().encode(data)
@@ -190,9 +211,14 @@ ori_get_request = Root.get_request
 
 def get_request(self, httprequest):
     db = httprequest.session.db
-    service_registry = _rest_services_databases.get(db)
-    if service_registry:
-        for root_path in service_registry:
+    if db and odoo.service.db.exp_db_exist(db):
+        # on the very first request processed by a worker,
+        # registry is not loaded yet
+        # so we enforce its loading here to make sure that
+        # _rest_services_databases is not empty
+        odoo.registry(db)
+        rest_routes = _rest_services_routes.get(db, [])
+        for root_path in rest_routes:
             if httprequest.path.startswith(root_path):
                 return HttpRestRequest(httprequest)
     return ori_get_request(self, httprequest)

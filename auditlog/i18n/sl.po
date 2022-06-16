@@ -67,6 +67,11 @@ msgid "Auto-vacuum audit logs"
 msgstr ""
 
 #. module: auditlog
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__capture_record
+msgid "Capture Record"
+msgstr ""
+
+#. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_request__user_context
 msgid "Context"
 msgstr "Kontekst"
@@ -94,6 +99,7 @@ msgid "Created on"
 msgstr "Ustvarjeno"
 
 #. module: auditlog
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "Date"
 msgstr "Datum"
@@ -112,20 +118,28 @@ msgid "Display Name"
 msgstr "Prikazni naziv"
 
 #. module: auditlog
-#: selection:auditlog.rule,state:0
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_rule__state__draft
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_rule_search
 msgid "Draft"
 msgstr "Osnutek"
 
 #. module: auditlog
-#: selection:auditlog.log,log_type:0 selection:auditlog.rule,log_type:0
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_log__log_type__fast
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_rule__log_type__fast
 msgid "Fast log"
 msgstr "Hitri dnevnik"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__field_id
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 msgid "Field"
 msgstr "Polje"
+
+#. module: auditlog
+#: code:addons/auditlog/models/rule.py:0
+#, python-format
+msgid "Field 'model_id' cannot be empty."
+msgstr ""
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__line_ids
@@ -134,7 +148,8 @@ msgid "Fields updated"
 msgstr "Posodobljena polja"
 
 #. module: auditlog
-#: selection:auditlog.log,log_type:0 selection:auditlog.rule,log_type:0
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_log__log_type__full
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_rule__log_type__full
 msgid "Full log"
 msgstr "Polni dnevnik"
 
@@ -155,6 +170,7 @@ msgstr ""
 #. module: auditlog
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_search
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_rule_search
 msgid "Group By..."
@@ -167,7 +183,9 @@ msgstr "HTTP kontekst"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__http_request_id
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__http_request_id
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_form
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "HTTP Request"
 msgstr "HTTP zahtevek"
@@ -177,7 +195,6 @@ msgstr "HTTP zahtevek"
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_session__http_request_ids
 #: model:ir.ui.menu,name:auditlog.menu_action_auditlog_http_request_tree
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_search
-#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_tree
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_form
 msgid "HTTP Requests"
 msgstr "HTTP zahtevki"
@@ -244,6 +261,14 @@ msgid "Log Deletes"
 msgstr "Dnevnik brisanja"
 
 #. module: auditlog
+#: model:ir.actions.act_window,name:auditlog.action_auditlog_line
+#: model:ir.ui.menu,name:auditlog.menu_auditlog_line
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_tree
+msgid "Log Lines"
+msgstr ""
+
+#. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__log_read
 msgid "Log Reads"
 msgstr "Dnevnik branja"
@@ -259,21 +284,30 @@ msgstr "Dnevnik zapisov"
 #: model:ir.ui.menu,name:auditlog.menu_audit_logs
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_form
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
-#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_tree
 msgid "Logs"
 msgstr "Dnevniki"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__method
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__method
 msgid "Method"
 msgstr "Metoda"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__model_id
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__model_id
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__model_id
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "Model"
 msgstr "Model"
+
+#. module: auditlog
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log__model_name
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__model_name
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__model_name
+msgid "Model Name"
+msgstr ""
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_request__display_name
@@ -293,6 +327,24 @@ msgid "New value Text"
 msgstr "Nova vrednost tekstualno"
 
 #. module: auditlog
+#: code:addons/auditlog/models/log.py:0
+#, python-format
+msgid "No field defined to create line."
+msgstr ""
+
+#. module: auditlog
+#: code:addons/auditlog/models/rule.py:0
+#, python-format
+msgid "No model defined to create line."
+msgstr ""
+
+#. module: auditlog
+#: code:addons/auditlog/models/log.py:0
+#, python-format
+msgid "No model defined to create log."
+msgstr ""
+
+#. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__old_value
 msgid "Old Value"
 msgstr "Stara vrednost"
@@ -310,12 +362,15 @@ msgstr "Pot"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__res_id
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__res_id
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "Resource ID"
 msgstr "ID vira"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__name
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__name
 msgid "Resource Name"
 msgstr "Naziv vira"
 
@@ -334,7 +389,6 @@ msgstr "Pravilo"
 #: model:ir.actions.act_window,name:auditlog.action_auditlog_rule_tree
 #: model:ir.ui.menu,name:auditlog.menu_action_auditlog_rule_tree
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_rule_search
-#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_rule_tree
 msgid "Rules"
 msgstr "Pravila"
 
@@ -342,6 +396,11 @@ msgstr "Pravila"
 #: model:ir.model.fields,help:auditlog.field_auditlog_rule__model_id
 msgid "Select model for which you want to generate log."
 msgstr "Izbira modela za katerega ustvarjate dnevnik."
+
+#. module: auditlog
+#: model:ir.model.fields,help:auditlog.field_auditlog_rule__capture_record
+msgid "Select this if you want to keep track of Unlink Record"
+msgstr ""
 
 #. module: auditlog
 #: model:ir.model.fields,help:auditlog.field_auditlog_rule__log_create
@@ -382,6 +441,7 @@ msgstr ""
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_request__http_session_id
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__http_session_id
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__http_session_id
 msgid "Session"
 msgstr "Seja"
 
@@ -402,10 +462,17 @@ msgid "Subscribe"
 msgstr "Naroči se"
 
 #. module: auditlog
-#: selection:auditlog.rule,state:0
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_rule__state__subscribed
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_rule_search
 msgid "Subscribed"
 msgstr "Naročen"
+
+#. module: auditlog
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log__model_model
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__model_model
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__model_model
+msgid "Technical Model Name"
+msgstr ""
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__field_name
@@ -413,7 +480,19 @@ msgid "Technical name"
 msgstr "Tehnični naziv"
 
 #. module: auditlog
-#: sql_constraint:auditlog.rule:0
+#: code:addons/auditlog/models/log.py:0
+#, python-format
+msgid "The field 'field_id' cannot be empty."
+msgstr ""
+
+#. module: auditlog
+#: code:addons/auditlog/models/log.py:0
+#, python-format
+msgid "The field 'model_id' cannot be empty."
+msgstr ""
+
+#. module: auditlog
+#: model:ir.model.constraint,message:auditlog.constraint_auditlog_rule_model_uniq
 msgid ""
 "There is already a rule defined on this model\n"
 "You cannot define another: please edit the existing one."
@@ -423,6 +502,7 @@ msgstr ""
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__log_type
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__log_type
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__log_type
 msgid "Type"
 msgstr "Tip"
@@ -436,8 +516,10 @@ msgstr "Odjavi naročnino"
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_request__user_id
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_session__user_id
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__user_id
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__user_id
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_search
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "User"
 msgstr "Uporabnik"
@@ -445,6 +527,7 @@ msgstr "Uporabnik"
 #. module: auditlog
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_form
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "User session"
 msgstr "Uporabniška seja"
@@ -453,7 +536,6 @@ msgstr "Uporabniška seja"
 #: model:ir.actions.act_window,name:auditlog.action_auditlog_http_session_tree
 #: model:ir.ui.menu,name:auditlog.menu_action_auditlog_http_session_tree
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_search
-#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_tree
 msgid "User sessions"
 msgstr "Uporabniške seje"
 
@@ -468,7 +550,7 @@ msgid "Values"
 msgstr "Vrednosti"
 
 #. module: auditlog
-#: code:addons/auditlog/models/rule.py:538
+#: code:addons/auditlog/models/rule.py:0
 #, python-format
 msgid "View logs"
 msgstr "Prikaz dnevnikov"

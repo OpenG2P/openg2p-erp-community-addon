@@ -53,7 +53,7 @@ A public file, containing that will contain public variables::
 
     # server environment options
     export SERVER_ENV_CONFIG="
-    [storage_backend.my-sftp]
+    [storage_backend.my_sftp]
     sftp_server=10.10.10.10
     sftp_login=foo
     sftp_port=22200
@@ -67,9 +67,17 @@ A second file which is encrypted and contains secrets::
     export DB_PASSWORD='xxxxxxxxx'
     # server environment options
     export SERVER_ENV_CONFIG_SECRET="
-    [storage_backend.my-sftp]
+    [storage_backend.my_sftp]
     sftp_password=xxxxxxxxx
     "
+
+**WARNING**
+
+  `my_sftp` must match the name of the record.
+  If you want something more reliable use `server.env.techname.mixin`
+  and use `tech_name` field to reference records.
+  See "USAGE".
+
 
 Default values
 ~~~~~~~~~~~~~~
@@ -84,8 +92,8 @@ When the default field is used, the field is made editable on Odoo.
 Note: empty environment keys always take precedence over default fields
 
 
-Keychain integration
-~~~~~~~~~~~~~~~~~~~~
+Server environment integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Read the documentation of the class `models/server_env_mixin.py
 <models/server_env_mixin.py>`_.

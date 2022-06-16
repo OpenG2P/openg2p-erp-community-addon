@@ -1,5 +1,8 @@
+import logging
 from odoo import api, fields, models
 from odoo.addons.http_routing.models.ir_http import slugify
+
+_logger = logging.getLogger(__name__)
 
 
 class GenericMixinNameWithCode(models.AbstractModel):
@@ -15,11 +18,11 @@ class GenericMixinNameWithCode(models.AbstractModel):
          'Code must be ascii only'),
     ]
 
-    # TODO: maybe use display_name?
-    @api.onchange('name')
+    @api.onchange('name', 'code')
     def _onchange_mixin_name_set_code(self):
         for record in self:
-            record.code = slugify(record.name or '', max_length=0)
+            if record.name and not record.code:
+                record.code = slugify(record.name or '', max_length=0)
 
 
 class GenericMixinUniqNameCode(models.AbstractModel):

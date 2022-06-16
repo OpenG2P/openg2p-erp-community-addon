@@ -29,13 +29,23 @@ class ApiDocsController(Controller):
     def index(self, **params):
         self._get_api_urls()
         primary_name = params.get("urls.primaryName")
-        values = {"api_urls": self._get_api_urls(), "primary_name": primary_name}
+        swagger_settings = {
+            "urls": self._get_api_urls(),
+            "urls.primaryName": primary_name,
+        }
+        values = {"swagger_settings": swagger_settings}
         return request.render("base_rest.openapi", values)
 
     @route("/api-docs/<path:collection>/<string:service_name>.json", auth="public")
     def api(self, collection, service_name):
-        with self.service_component(collection, service_name) as service:
-            return self.make_json_response(service.to_openapi())
+        with self.service_and_controller_class(collection, service_name) as (
+            service,
+            controller_class,
+        ):
+            openapi_doc = service.to_openapi(
+                default_auth=controller_class._default_auth
+            )
+            return self.make_json_response(openapi_doc)
 
     def _get_api_urls(self):
         """
@@ -60,11 +70,8 @@ class ApiDocsController(Controller):
         return api_urls
 
     def _filter_service_components(self, components):
-        r = []
-        for c in components:
-            if hasattr(c, "_is_rest_service_component") and c._usage:
-                r.append(c)
-        return r
+        reg_model = request.env["rest.service.registration"]
+        return [c for c in components if reg_model._filter_service_component(c)]
 
     def _get_service_in_collection(self, collection_name):
         with self.work_on_component(collection_name) as work:
@@ -74,18 +81,21 @@ class ApiDocsController(Controller):
         return services
 
     @contextmanager
-    def service_component(self, collection_path, service_name):
+    def service_and_controller_class(self, collection_path, service_name):
         """
         Return the component that implements the methods of the requested
         service.
         :param collection_path:
         :param service_name:
-        :return: an instance of invader.service component
+        :return: an instance of invader.service component,
+                 the base controller class serving the service
         """
-        collection_name = self._get_collection_name(collection_path)
+        services_spec = self._get_services_specs(collection_path)
+        collection_name = services_spec["collection_name"]
+        controller_class = services_spec["controller_class"]
         with self.work_on_component(collection_name) as work:
             service = work.component(usage=service_name)
-            yield service
+            yield service, controller_class
 
     @contextmanager
     def work_on_component(self, collection_name):
@@ -98,6 +108,6 @@ class ApiDocsController(Controller):
         collection = _PseudoCollection(collection_name, request.env)
         yield WorkContext(model_name="rest.service.registration", collection=collection)
 
-    def _get_collection_name(self, name):
+    def _get_services_specs(self, path):
         services_registry = _rest_services_databases.get(request.env.cr.dbname, {})
-        return services_registry["/" + name + "/"]["collection_name"]
+        return services_registry["/" + path + "/"]

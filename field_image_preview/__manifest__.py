@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2016-2019 Artem Shurshilov <shurshilov.a@yandex.ru>
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+# Copyright (C) 2016-2019 Shurshilov Artem <shurshilov.a@yandex.ru>
+# License LGPL-3 or later (http://www.gnu.org/licenses/agpl).
 {
     'name': 'Widget image preview',
     'summary': """Adds functional preview (open/popup) image in original size 
@@ -21,9 +21,9 @@ This is extension for <field widget="image"> widget image
     
     # Categories can be used to filter modules in modules listing
     'category': "Tools",
-    'version': '12.4.0',
+    'version': '14.1.0.1',
     # any module necessary for this one to work correctly
-    'depends': ['web','mail'],
+    'depends': ['web','mail', 'swipe_images_backend'],
     "license": "LGPL-3",
 #    'price': 9.99,
 #    'currency': 'EUR',

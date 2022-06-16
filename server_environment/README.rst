@@ -7,20 +7,23 @@ server configuration environment files
    !! changes will be overwritten.                   !!
    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-.. |badge1| image:: https://img.shields.io/badge/maturity-Beta-yellow.png
+.. |badge1| image:: https://img.shields.io/badge/maturity-Production%2FStable-green.png
     :target: https://odoo-community.org/page/development-status
-    :alt: Beta
-.. |badge2| image:: https://img.shields.io/badge/github-OCA%2Fserver--env-lightgray.png?logo=github
-    :target: https://github.com/OCA/server-env/tree/12.0/server_environment
+    :alt: Production/Stable
+.. |badge2| image:: https://img.shields.io/badge/licence-LGPL--3-blue.png
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
+.. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fserver--env-lightgray.png?logo=github
+    :target: https://github.com/OCA/server-env/tree/14.0/server_environment
     :alt: OCA/server-env
-.. |badge3| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
-    :target: https://translation.odoo-community.org/projects/server-env-12-0/server-env-12-0-server_environment
+.. |badge4| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
+    :target: https://translation.odoo-community.org/projects/server-env-14-0/server-env-14-0-server_environment
     :alt: Translate me on Weblate
-.. |badge4| image:: https://img.shields.io/badge/runbot-Try%20me-875A7B.png
-    :target: https://runbot.odoo-community.org/runbot/254/12.0
+.. |badge5| image:: https://img.shields.io/badge/runbot-Try%20me-875A7B.png
+    :target: https://runbot.odoo-community.org/runbot/254/14.0
     :alt: Try me on Runbot
 
-|badge1| |badge2| |badge3| |badge4| 
+|badge1| |badge2| |badge3| |badge4| |badge5| 
 
 This module provides a way to define an environment in the main Odoo
 configuration file and to read some configurations from files
@@ -113,7 +116,7 @@ A public file, containing that will contain public variables::
 
     # server environment options
     export SERVER_ENV_CONFIG="
-    [storage_backend.my-sftp]
+    [storage_backend.my_sftp]
     sftp_server=10.10.10.10
     sftp_login=foo
     sftp_port=22200
@@ -127,9 +130,17 @@ A second file which is encrypted and contains secrets::
     export DB_PASSWORD='xxxxxxxxx'
     # server environment options
     export SERVER_ENV_CONFIG_SECRET="
-    [storage_backend.my-sftp]
+    [storage_backend.my_sftp]
     sftp_password=xxxxxxxxx
     "
+
+**WARNING**
+
+  `my_sftp` must match the name of the record.
+  If you want something more reliable use `server.env.techname.mixin`
+  and use `tech_name` field to reference records.
+  See "USAGE".
+
 
 Default values
 ~~~~~~~~~~~~~~
@@ -144,8 +155,8 @@ When the default field is used, the field is made editable on Odoo.
 Note: empty environment keys always take precedence over default fields
 
 
-Keychain integration
-~~~~~~~~~~~~~~~~~~~~
+Server environment integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Read the documentation of the class `models/server_env_mixin.py
 <models/server_env_mixin.py>`_.
@@ -169,12 +180,23 @@ by an override of ``_server_env_fields``.
 Read the documentation of the class and methods in `models/server_env_mixin.py
 <models/server_env_mixin.py>`__.
 
+
+If you want to have a technical name to reference::
+
+    class StorageBackend(models.Model):
+        _name = "storage.backend"
+        _inherit = ["storage.backend", "server.env.techname.mixin", "server.env.mixin"]
+
+        [...]
+
 Known issues / Roadmap
 ======================
 
 * it is not possible to set the environment from the command line. A
   configuration file must be used.
 * the module does not allow to set low level attributes such as database server, etc.
+* `server.env.techname.mixin`'s `tech_name` field could leverage the new option
+  for computable / writable fields and get rid of some onchange / read / write code.
 
 Bug Tracker
 ===========
@@ -182,7 +204,7 @@ Bug Tracker
 Bugs are tracked on `GitHub Issues <https://github.com/OCA/server-env/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us smashing it by providing a detailed and welcomed
-`feedback <https://github.com/OCA/server-env/issues/new?body=module:%20server_environment%0Aversion:%2012.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/OCA/server-env/issues/new?body=module:%20server_environment%0Aversion:%2014.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -208,6 +230,7 @@ Contributors
 * Guewen Baconnier <guewen.baconnier@camptocamp.com>
 * Thomas Binfeld <thomas.binsfeld@acsone.eu>
 * Stéphane Bidoul <stefane.bidoul@acsone.com>
+* Simone Orsi <simahawk@gmail.com>
 
 Maintainers
 ~~~~~~~~~~~
@@ -222,6 +245,6 @@ OCA, or the Odoo Community Association, is a nonprofit organization whose
 mission is to support the collaborative development of Odoo features and
 promote its widespread use.
 
-This module is part of the `OCA/server-env <https://github.com/OCA/server-env/tree/12.0/server_environment>`_ project on GitHub.
+This module is part of the `OCA/server-env <https://github.com/OCA/server-env/tree/14.0/server_environment>`_ project on GitHub.
 
 You are welcome to contribute. To learn how please visit https://odoo-community.org/page/Contribute.

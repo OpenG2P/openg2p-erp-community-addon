@@ -31,3 +31,11 @@
 
   * Marcel Savegnago
   * Eduardo Aparício
+
+* `Obertix <https://www.obertix.net>`_:
+
+  * Vicent Cubells
+
+* `Solvos <https://www.solvos.es>`_:
+
+  * David Alonso

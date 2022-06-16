@@ -1,52 +1,66 @@
 # Copyright 2017 Akretion (http://www.akretion.com).
 # @author Sébastien BEAU <sebastien.beau@akretion.com>
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 
 import base64
 
-from odoo.addons.component.tests.common import TransactionComponentCase
+import mock
+
+from odoo.addons.component.tests.common import SavepointComponentCase
 
 
-class GenericStoreCase(object):
+class BackendStorageTestMixin(object):
     def _test_setting_and_getting_data(self):
         # Check that the directory is empty
-        files = self.backend._list()
+        files = self.backend.list_files()
         self.assertNotIn(self.filename, files)
 
         # Add a new file
-        self.backend._add_b64_data(self.filename, self.filedata, mimetype=u"text/plain")
+        self.backend.add(
+            self.filename, self.filedata, mimetype="text/plain", binary=False
+        )
 
         # Check that the file exist
-        files = self.backend._list()
+        files = self.backend.list_files()
         self.assertIn(self.filename, files)
 
         # Retrieve the file added
-        data = self.backend._get_b64_data(self.filename)
+        data = self.backend.get(self.filename, binary=False)
         self.assertEqual(data, self.filedata)
 
         # Delete the file
-        self.backend._delete(self.filename)
-        files = self.backend._list()
+        self.backend.delete(self.filename)
+        files = self.backend.list_files()
         self.assertNotIn(self.filename, files)
 
-    def test_setting_and_getting_data_from_root(self):
+    def _test_setting_and_getting_data_from_root(self):
         self._test_setting_and_getting_data()
 
-    def test_setting_and_getting_data_from_dir(self):
+    def _test_setting_and_getting_data_from_dir(self):
         self.backend.directory_path = self.case_with_subdirectory
         self._test_setting_and_getting_data()
 
+    def _test_find_files(
+        self,
+        backend,
+        adapter_dotted_path,
+        mocked_filepaths,
+        pattern,
+        expected_filepaths,
+    ):
+        with mock.patch(adapter_dotted_path + ".list") as mocked:
+            mocked.return_value = mocked_filepaths
+            res = backend.find_files(pattern)
+            self.assertEqual(sorted(res), sorted(expected_filepaths))
 
-class Common(TransactionComponentCase):
-    def _add_access_right_to_user(self):
-        self.user.write({"groups_id": [(4, self.env.ref("base.group_system").id)]})
 
-    def setUp(self):
-        super(Common, self).setUp()
-        self.user = self.env.ref("base.user_demo")
-        self._add_access_right_to_user()
-        self.env = self.env(user=self.user)
-        self.backend = self.env.ref("storage_backend.default_storage_backend")
-        self.filedata = base64.b64encode(b"This is a simple file")
-        self.filename = "test_file.txt"
-        self.case_with_subdirectory = "subdirectory/here"
+class CommonCase(SavepointComponentCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env = cls.env(context=dict(cls.env.context, tracking_disable=True))
+        cls.backend = cls.env.ref("storage_backend.default_storage_backend")
+        cls.filedata = base64.b64encode(b"This is a simple file")
+        cls.filename = "test_file.txt"
+        cls.case_with_subdirectory = "subdirectory/here"
+        cls.demo_user = cls.env.ref("base.user_demo")
