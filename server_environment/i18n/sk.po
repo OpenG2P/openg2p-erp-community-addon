@@ -36,6 +36,7 @@ msgstr "Vytvorené"
 #. module: server_environment
 #: model:ir.model.fields,field_description:server_environment.field_server_config__display_name
 #: model:ir.model.fields,field_description:server_environment.field_server_env_mixin__display_name
+#: model:ir.model.fields,field_description:server_environment.field_server_env_techname_mixin__display_name
 msgid "Display Name"
 msgstr "Zobraziť meno"
 
@@ -47,12 +48,14 @@ msgstr ""
 #. module: server_environment
 #: model:ir.model.fields,field_description:server_environment.field_server_config__id
 #: model:ir.model.fields,field_description:server_environment.field_server_env_mixin__id
+#: model:ir.model.fields,field_description:server_environment.field_server_env_techname_mixin__id
 msgid "ID"
 msgstr "ID"
 
 #. module: server_environment
 #: model:ir.model.fields,field_description:server_environment.field_server_config____last_update
 #: model:ir.model.fields,field_description:server_environment.field_server_env_mixin____last_update
+#: model:ir.model.fields,field_description:server_environment.field_server_env_techname_mixin____last_update
 msgid "Last Modified on"
 msgstr "Posledná modifikácia"
 
@@ -77,9 +80,24 @@ msgid "Server Env Defaults"
 msgstr ""
 
 #. module: server_environment
-#: model:ir.actions.act_window,name:server_environment.act_show_config_window
+#: model:ir.actions.act_window,name:server_environment.server_env_act_show_config
 #: model:ir.ui.menu,name:server_environment.menu_server_show_config
 msgid "Server Environment"
+msgstr ""
+
+#. module: server_environment
+#: model:ir.model,name:server_environment.model_server_env_techname_mixin
+msgid "Server environment technical name"
+msgstr ""
+
+#. module: server_environment
+#: model:ir.model.fields,field_description:server_environment.field_server_env_techname_mixin__tech_name
+msgid "Tech Name"
+msgstr ""
+
+#. module: server_environment
+#: model:ir.model.fields,help:server_environment.field_server_env_techname_mixin__tech_name
+msgid "Unique name for technical purposes. Eg: server env keys."
 msgstr ""
 
 #. module: server_environment
@@ -88,78 +106,9 @@ msgid "View Server Environment Configuration"
 msgstr ""
 
 #. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__custom_ged_I_ged_folder
-msgid "custom_ged | ged_folder"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__external_service_I_CONSTA
-msgid "external_service | CONSTA"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__external_service_I_CONSTB
-msgid "external_service | CONSTB"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__external_service_I_CONSTC
-msgid "external_service | CONSTC"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__external_service_ftp_I_in_path
-msgid "external_service_ftp | in_path"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__external_service_ftp_I_out_path
-msgid "external_service_ftp | out_path"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__external_service_ftp_I_password
-msgid "external_service_ftp | password"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__external_service_ftp_I_port
-msgid "external_service_ftp | port"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__external_service_ftp_I_server
-msgid "external_service_ftp | server"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__external_service_ftp_I_tls
-msgid "external_service_ftp | tls"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__external_service_ftp_I_user
-msgid "external_service_ftp | user"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__ir_config_parameter_I_ircp_empty
-msgid "ir_config_parameter | ircp_empty"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__ir_config_parameter_I_ircp_from_config
-msgid "ir_config_parameter | ircp_from_config"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__misc_I_completed_state
-msgid "misc | completed_state"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__misc_I_smtp_server
-msgid "misc | smtp_server"
+#: model:ir.model.constraint,message:server_environment.constraint_payment_acquirer_tech_name_uniq
+#: model:ir.model.constraint,message:server_environment.constraint_server_env_techname_mixin_tech_name_uniq
+msgid "`tech_name` must be unique!"
 msgstr ""
 
 #. module: server_environment
@@ -343,11 +292,6 @@ msgid "odoo | logfile"
 msgstr ""
 
 #. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__odoo_I_logrotate
-msgid "odoo | logrotate"
-msgstr ""
-
-#. module: server_environment
 #: model:ir.model.fields,field_description:server_environment.field_server_config__odoo_I_longpolling_port
 msgid "odoo | longpolling_port"
 msgstr ""
@@ -413,6 +357,16 @@ msgid "odoo | save"
 msgstr ""
 
 #. module: server_environment
+#: model:ir.model.fields,field_description:server_environment.field_server_config__odoo_I_screencasts
+msgid "odoo | screencasts"
+msgstr ""
+
+#. module: server_environment
+#: model:ir.model.fields,field_description:server_environment.field_server_config__odoo_I_screenshots
+msgid "odoo | screenshots"
+msgstr ""
+
+#. module: server_environment
 #: model:ir.model.fields,field_description:server_environment.field_server_config__odoo_I_server_wide_modules
 msgid "odoo | server_wide_modules"
 msgstr ""
@@ -473,6 +427,11 @@ msgid "odoo | test_tags"
 msgstr ""
 
 #. module: server_environment
+#: model:ir.model.fields,field_description:server_environment.field_server_config__odoo_I_transient_age_limit
+msgid "odoo | transient_age_limit"
+msgstr ""
+
+#. module: server_environment
 #: model:ir.model.fields,field_description:server_environment.field_server_config__odoo_I_translate_in
 msgid "odoo | translate_in"
 msgstr ""
@@ -498,6 +457,11 @@ msgid "odoo | update"
 msgstr ""
 
 #. module: server_environment
+#: model:ir.model.fields,field_description:server_environment.field_server_config__odoo_I_upgrade_path
+msgid "odoo | upgrade_path"
+msgstr ""
+
+#. module: server_environment
 #: model:ir.model.fields,field_description:server_environment.field_server_config__odoo_I_without_demo
 msgid "odoo | without_demo"
 msgstr ""
@@ -505,61 +469,6 @@ msgstr ""
 #. module: server_environment
 #: model:ir.model.fields,field_description:server_environment.field_server_config__odoo_I_workers
 msgid "odoo | workers"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_footer_I_line_1
-msgid "pos_environment_footer | line_1"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_footer_I_line_2
-msgid "pos_environment_footer | line_2"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_footer_I_line_3
-msgid "pos_environment_footer | line_3"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_footer_I_line_4
-msgid "pos_environment_footer | line_4"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_footer_I_line_5
-msgid "pos_environment_footer | line_5"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_footer_I_line_6
-msgid "pos_environment_footer | line_6"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_footer_I_line_7
-msgid "pos_environment_footer | line_7"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_header_I_line_1
-msgid "pos_environment_header | line_1"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_header_I_line_2
-msgid "pos_environment_header | line_2"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_header_I_line_3
-msgid "pos_environment_header | line_3"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__pos_environment_header_I_line_4
-msgid "pos_environment_header | line_4"
 msgstr ""
 
 #. module: server_environment
@@ -610,9 +519,4 @@ msgstr ""
 #. module: server_environment
 #: model:ir.model.fields,field_description:server_environment.field_server_config__system_I_version
 msgid "system | version"
-msgstr ""
-
-#. module: server_environment
-#: model:ir.model.fields,field_description:server_environment.field_server_config__wkhtml2pdf_I_lib_path
-msgid "wkhtml2pdf | lib_path"
 msgstr ""

@@ -68,6 +68,11 @@ msgid "Auto-vacuum audit logs"
 msgstr "Limpiar automáticamente los auditlogs"
 
 #. module: auditlog
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__capture_record
+msgid "Capture Record"
+msgstr ""
+
+#. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_request__user_context
 msgid "Context"
 msgstr "Contexto"
@@ -95,6 +100,7 @@ msgid "Created on"
 msgstr "Creado en"
 
 #. module: auditlog
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "Date"
 msgstr "Fecha"
@@ -113,20 +119,28 @@ msgid "Display Name"
 msgstr "Nombre a mostrar"
 
 #. module: auditlog
-#: selection:auditlog.rule,state:0
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_rule__state__draft
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_rule_search
 msgid "Draft"
 msgstr "No suscrito"
 
 #. module: auditlog
-#: selection:auditlog.log,log_type:0 selection:auditlog.rule,log_type:0
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_log__log_type__fast
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_rule__log_type__fast
 msgid "Fast log"
 msgstr "Registro rápido"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__field_id
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 msgid "Field"
 msgstr "Campo"
+
+#. module: auditlog
+#: code:addons/auditlog/models/rule.py:0
+#, python-format
+msgid "Field 'model_id' cannot be empty."
+msgstr ""
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__line_ids
@@ -135,7 +149,8 @@ msgid "Fields updated"
 msgstr "Campos actualizados"
 
 #. module: auditlog
-#: selection:auditlog.log,log_type:0 selection:auditlog.rule,log_type:0
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_log__log_type__full
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_rule__log_type__full
 msgid "Full log"
 msgstr "Registro completo"
 
@@ -156,6 +171,7 @@ msgstr ""
 #. module: auditlog
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_search
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_rule_search
 msgid "Group By..."
@@ -168,7 +184,9 @@ msgstr "Contexto HTTP"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__http_request_id
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__http_request_id
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_form
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "HTTP Request"
 msgstr "Petición HTTP"
@@ -178,7 +196,6 @@ msgstr "Petición HTTP"
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_session__http_request_ids
 #: model:ir.ui.menu,name:auditlog.menu_action_auditlog_http_request_tree
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_search
-#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_tree
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_form
 msgid "HTTP Requests"
 msgstr "Peticiones HTTP"
@@ -245,6 +262,14 @@ msgid "Log Deletes"
 msgstr "Borrar registros"
 
 #. module: auditlog
+#: model:ir.actions.act_window,name:auditlog.action_auditlog_line
+#: model:ir.ui.menu,name:auditlog.menu_auditlog_line
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_tree
+msgid "Log Lines"
+msgstr ""
+
+#. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__log_read
 msgid "Log Reads"
 msgstr "Registrar lecturas"
@@ -260,21 +285,30 @@ msgstr "Registrar modificaciones"
 #: model:ir.ui.menu,name:auditlog.menu_audit_logs
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_form
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
-#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_tree
 msgid "Logs"
 msgstr "Registros"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__method
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__method
 msgid "Method"
 msgstr "Método"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__model_id
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__model_id
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__model_id
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "Model"
 msgstr "Modelo"
+
+#. module: auditlog
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log__model_name
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__model_name
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__model_name
+msgid "Model Name"
+msgstr ""
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_request__display_name
@@ -294,6 +328,24 @@ msgid "New value Text"
 msgstr "Texto del valor nuevo"
 
 #. module: auditlog
+#: code:addons/auditlog/models/log.py:0
+#, python-format
+msgid "No field defined to create line."
+msgstr ""
+
+#. module: auditlog
+#: code:addons/auditlog/models/rule.py:0
+#, python-format
+msgid "No model defined to create line."
+msgstr ""
+
+#. module: auditlog
+#: code:addons/auditlog/models/log.py:0
+#, python-format
+msgid "No model defined to create log."
+msgstr ""
+
+#. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__old_value
 msgid "Old Value"
 msgstr "Valor anterior"
@@ -311,12 +363,15 @@ msgstr "Ruta"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__res_id
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__res_id
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "Resource ID"
 msgstr "ID del recurso"
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__name
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__name
 msgid "Resource Name"
 msgstr "Nombre del recurso"
 
@@ -335,7 +390,6 @@ msgstr "Regla"
 #: model:ir.actions.act_window,name:auditlog.action_auditlog_rule_tree
 #: model:ir.ui.menu,name:auditlog.menu_action_auditlog_rule_tree
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_rule_search
-#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_rule_tree
 msgid "Rules"
 msgstr "Reglas"
 
@@ -343,6 +397,11 @@ msgstr "Reglas"
 #: model:ir.model.fields,help:auditlog.field_auditlog_rule__model_id
 msgid "Select model for which you want to generate log."
 msgstr "Seleccione el modelo al que quiere generar un registro."
+
+#. module: auditlog
+#: model:ir.model.fields,help:auditlog.field_auditlog_rule__capture_record
+msgid "Select this if you want to keep track of Unlink Record"
+msgstr ""
 
 #. module: auditlog
 #: model:ir.model.fields,help:auditlog.field_auditlog_rule__log_create
@@ -383,6 +442,7 @@ msgstr ""
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_request__http_session_id
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__http_session_id
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__http_session_id
 msgid "Session"
 msgstr "Sesión"
 
@@ -403,10 +463,17 @@ msgid "Subscribe"
 msgstr "Suscribir"
 
 #. module: auditlog
-#: selection:auditlog.rule,state:0
+#: model:ir.model.fields.selection,name:auditlog.selection__auditlog_rule__state__subscribed
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_rule_search
 msgid "Subscribed"
 msgstr "Suscrito"
+
+#. module: auditlog
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log__model_model
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__model_model
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__model_model
+msgid "Technical Model Name"
+msgstr ""
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__field_name
@@ -414,7 +481,19 @@ msgid "Technical name"
 msgstr "Nombre técnico"
 
 #. module: auditlog
-#: sql_constraint:auditlog.rule:0
+#: code:addons/auditlog/models/log.py:0
+#, python-format
+msgid "The field 'field_id' cannot be empty."
+msgstr ""
+
+#. module: auditlog
+#: code:addons/auditlog/models/log.py:0
+#, python-format
+msgid "The field 'model_id' cannot be empty."
+msgstr ""
+
+#. module: auditlog
+#: model:ir.model.constraint,message:auditlog.constraint_auditlog_rule_model_uniq
 msgid ""
 "There is already a rule defined on this model\n"
 "You cannot define another: please edit the existing one."
@@ -424,6 +503,7 @@ msgstr ""
 
 #. module: auditlog
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__log_type
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__log_type
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_rule__log_type
 msgid "Type"
 msgstr "Tipo"
@@ -437,8 +517,10 @@ msgstr "Desuscribir"
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_request__user_id
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_http_session__user_id
 #: model:ir.model.fields,field_description:auditlog.field_auditlog_log__user_id
+#: model:ir.model.fields,field_description:auditlog.field_auditlog_log_line__user_id
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_search
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "User"
 msgstr "Usuario"
@@ -446,6 +528,7 @@ msgstr "Usuario"
 #. module: auditlog
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_request_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_form
+#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_line_search
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_log_search
 msgid "User session"
 msgstr "Sesión de usuario"
@@ -454,7 +537,6 @@ msgstr "Sesión de usuario"
 #: model:ir.actions.act_window,name:auditlog.action_auditlog_http_session_tree
 #: model:ir.ui.menu,name:auditlog.menu_action_auditlog_http_session_tree
 #: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_search
-#: model_terms:ir.ui.view,arch_db:auditlog.view_auditlog_http_session_tree
 msgid "User sessions"
 msgstr "Sesiones de usuario"
 
@@ -469,7 +551,7 @@ msgid "Values"
 msgstr "Valores"
 
 #. module: auditlog
-#: code:addons/auditlog/models/rule.py:538
+#: code:addons/auditlog/models/rule.py:0
 #, python-format
 msgid "View logs"
 msgstr "Ver registros"

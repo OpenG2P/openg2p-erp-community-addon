@@ -33,14 +33,11 @@ class Partner(models.Model):
             )
             count_active = record.helpdesk_ticket_active_count
             count = record.helpdesk_ticket_count
-            record.helpdesk_ticket_count_string = (
-                "{} / {}".format(count_active, count)
-            )
+            record.helpdesk_ticket_count_string = "{} / {}".format(count_active, count)
 
     def action_view_helpdesk_tickets(self):
         return {
             "name": self.name,
-            "view_type": "form",
             "view_mode": "tree,form",
             "res_model": "helpdesk.ticket",
             "type": "ir.actions.act_window",

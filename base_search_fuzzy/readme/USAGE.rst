@@ -12,13 +12,17 @@
 
    ``self.env.cr.execute("SELECT set_limit(0.2);")``
 
-#. Another interesting feature is the use of ``similarity(column, 'text')``
-   function in the ``order`` parameter to order by similarity. This module just
-   contains a basic implementation which doesn't perform validations and has to
-   start with this function. For example you can define the function as
-   followed:
-
-   ``similarity(%s.name, 'John Mil') DESC" % self.env['res.partner']._table``
-
 For further questions read the Documentation of the
 `pg_trgm <https://www.postgresql.org/docs/current/static/pgtrgm.html>`_ module.
+
+
+Usage with demo data
+====================
+
+There are some demo data that allow you to test functionally this module
+if you are in a **demo** database. The steps are the following:
+
+#. Go to *Contacts* and type the text **Jon Smith** or **Smith John** in
+   the search box and select **Search Display Name for: ...**
+#. You will see two contacts, and they are the ones with display names
+   **John Smith** and **John Smizz**.

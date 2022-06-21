@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: mass_operation_abstract
-#: code:addons/mass_operation_abstract/models/mass_operation_mixin.py:81
+#: code:addons/mass_operation_abstract/models/mass_operation_mixin.py:0
 #, python-format
 msgid "%s (copy)"
 msgstr "%s (copie)"
@@ -93,7 +93,7 @@ msgid "Last Modified on"
 msgstr "Dernière modification le"
 
 #. module: mass_operation_abstract
-#: code:addons/mass_operation_abstract/models/mass_operation_mixin.py:18
+#: code:addons/mass_operation_abstract/models/mass_operation_mixin.py:0
 #, python-format
 msgid "Mass Operation (%s)"
 msgstr "Opération en lot (%s)"
@@ -120,7 +120,7 @@ msgid "Name"
 msgstr "Nom"
 
 #. module: mass_operation_abstract
-#: code:addons/mass_operation_abstract/wizard/mass_operation_wizard_mixin.py:65
+#: code:addons/mass_operation_abstract/wizard/mass_operation_wizard_mixin.py:0
 #, python-format
 msgid "None of the %d items you have selected can be processed."
 msgstr "Aucun des %d éléments que vous avez sélectionné ne peut être traités."
@@ -176,13 +176,21 @@ msgid "Technical Informations"
 msgstr "Informations techniques"
 
 #. module: mass_operation_abstract
-#: code:addons/mass_operation_abstract/wizard/mass_operation_wizard_mixin.py:54
+#: code:addons/mass_operation_abstract/wizard/mass_operation_wizard_mixin.py:0
 #, python-format
 msgid "The treatment will be processed on the %d selected elements."
 msgstr "Le traitement sera réalisé sur les %d éléments sélectionnés."
 
 #. module: mass_operation_abstract
-#: code:addons/mass_operation_abstract/wizard/mass_operation_wizard_mixin.py:60
+#: code:addons/mass_operation_abstract/wizard/mass_operation_wizard_mixin.py:0
+#, python-format
+msgid ""
+"There is no more element that corresponds to the rules of the domain.\n"
+" Please refresh your list and try to select again the items."
+msgstr ""
+
+#. module: mass_operation_abstract
+#: code:addons/mass_operation_abstract/wizard/mass_operation_wizard_mixin.py:0
 #, python-format
 msgid ""
 "You have selected %d items that can not be processed. Only %d items will be "
@@ -191,14 +199,11 @@ msgstr ""
 "Vous avez sélectionné %d éléments qui ne peuvent pas être traités. Seulement "
 "%d éléments vont être traités."
 
-#. module: mass_operation_abstract
-#: code:addons/mass_operation_abstract/wizard/mass_operation_wizard_mixin.py:84
-#, python-format
-msgid ""
-"there is no more element that corresponds to the rules of the domain.\n"
-" Please refresh your list and try to select again the items."
-msgstr ""
-"Il n'y a pas d'élément qui correspond aux règles d'accès définis par le "
-"domaine.\n"
-"Veuillez rafraichir la liste des éléments, et sélectionner des éléments de "
-"nouveau"
+#~ msgid ""
+#~ "there is no more element that corresponds to the rules of the domain.\n"
+#~ " Please refresh your list and try to select again the items."
+#~ msgstr ""
+#~ "Il n'y a pas d'élément qui correspond aux règles d'accès définis par le "
+#~ "domaine.\n"
+#~ "Veuillez rafraichir la liste des éléments, et sélectionner des éléments "
+#~ "de nouveau"

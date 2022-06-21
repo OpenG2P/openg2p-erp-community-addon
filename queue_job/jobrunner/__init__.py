@@ -3,20 +3,21 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import logging
-import os
 from threading import Thread
 import time
 
 from odoo.service import server
 from odoo.tools import config
+
 try:
     from odoo.addons.server_environment import serv_config
-    if serv_config.has_section('queue_job'):
-        queue_job_config = serv_config['queue_job']
+
+    if serv_config.has_section("queue_job"):
+        queue_job_config = serv_config["queue_job"]
     else:
         queue_job_config = {}
 except ImportError:
-    queue_job_config = config.misc.get('queue_job', {})
+    queue_job_config = config.misc.get("queue_job", {})
 
 
 from .runner import QueueJobRunner, _channels
@@ -32,27 +33,10 @@ START_DELAY = 5
 
 
 class QueueJobRunnerThread(Thread):
-
     def __init__(self):
         Thread.__init__(self)
         self.daemon = True
-        scheme = (os.environ.get('ODOO_QUEUE_JOB_SCHEME') or
-                  queue_job_config.get("scheme"))
-        host = (os.environ.get('ODOO_QUEUE_JOB_HOST') or
-                queue_job_config.get("host") or
-                config['http_interface'])
-        port = (os.environ.get('ODOO_QUEUE_JOB_PORT') or
-                queue_job_config.get("port") or
-                config['http_port'])
-        user = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_USER') or
-                queue_job_config.get("http_auth_user"))
-        password = (os.environ.get('ODOO_QUEUE_JOB_HTTP_AUTH_PASSWORD') or
-                    queue_job_config.get("http_auth_password"))
-        self.runner = QueueJobRunner(scheme or 'http',
-                                     host or 'localhost',
-                                     port or 8069,
-                                     user,
-                                     password)
+        self.runner = QueueJobRunner.from_environ_or_config()
 
     def run(self):
         # sleep a bit to let the workers start at ease
@@ -63,47 +47,81 @@ class QueueJobRunnerThread(Thread):
         self.runner.stop()
 
 
+class WorkerJobRunner(server.Worker):
+    """Jobrunner workers"""
+
+    def __init__(self, multi):
+        super().__init__(multi)
+        self.watchdog_timeout = None
+        self.runner = QueueJobRunner.from_environ_or_config()
+
+    def sleep(self):
+        pass
+
+    def signal_handler(self, sig, frame):
+        _logger.debug("WorkerJobRunner (%s) received signal %s", self.pid, sig)
+        super().signal_handler(sig, frame)
+        self.runner.stop()
+
+    def process_work(self):
+        _logger.debug("WorkerJobRunner (%s) starting up", self.pid)
+        time.sleep(START_DELAY)
+        self.runner.run()
+
+
 runner_thread = None
 
 
 def _is_runner_enabled():
-    return not _channels().strip().startswith('root:0')
+    return not _channels().strip().startswith("root:0")
 
 
 def _start_runner_thread(server_type):
     global runner_thread
-    if not config['stop_after_init']:
+    if not config["stop_after_init"]:
         if _is_runner_enabled():
-            _logger.info("starting jobrunner thread (in %s)",
-                         server_type)
+            _logger.info("starting jobrunner thread (in %s)", server_type)
             runner_thread = QueueJobRunnerThread()
             runner_thread.start()
         else:
-            _logger.info("jobrunner thread (in %s) NOT started, " \
-                         "because the root channel's capacity is set to 0",
-                         server_type)
+            _logger.info(
+                "jobrunner thread (in %s) NOT started, "
+                "because the root channel's capacity is set to 0",
+                server_type,
+            )
 
 
-orig_prefork_start = server.PreforkServer.start
-orig_prefork_stop = server.PreforkServer.stop
+orig_prefork__init__ = server.PreforkServer.__init__
+orig_prefork_process_spawn = server.PreforkServer.process_spawn
+orig_prefork_worker_pop = server.PreforkServer.worker_pop
 orig_threaded_start = server.ThreadedServer.start
 orig_threaded_stop = server.ThreadedServer.stop
 
 
-def prefork_start(server, *args, **kwargs):
-    res = orig_prefork_start(server, *args, **kwargs)
-    _start_runner_thread("prefork server")
+def prefork__init__(server, app):
+    res = orig_prefork__init__(server, app)
+    server.jobrunner = {}
     return res
 
 
-def prefork_stop(server, graceful=True):
-    global runner_thread
-    if runner_thread:
-        runner_thread.stop()
-    res = orig_prefork_stop(server, graceful)
-    if runner_thread:
-        runner_thread.join()
-        runner_thread = None
+def prefork_process_spawn(server):
+    orig_prefork_process_spawn(server)
+    if not hasattr(server, "jobrunner"):
+        # if 'queue_job' is not in server wide modules, PreforkServer is
+        # not initialized with a 'jobrunner' attribute, skip this
+        return
+    if not server.jobrunner and _is_runner_enabled():
+        server.worker_spawn(WorkerJobRunner, server.jobrunner)
+
+
+def prefork_worker_pop(server, pid):
+    res = orig_prefork_worker_pop(server, pid)
+    if not hasattr(server, "jobrunner"):
+        # if 'queue_job' is not in server wide modules, PreforkServer is
+        # not initialized with a 'jobrunner' attribute, skip this
+        return res
+    if pid in server.jobrunner:
+        server.jobrunner.pop(pid)
     return res
 
 
@@ -124,7 +142,8 @@ def threaded_stop(server):
     return res
 
 
-server.PreforkServer.start = prefork_start
-server.PreforkServer.stop = prefork_stop
+server.PreforkServer.__init__ = prefork__init__
+server.PreforkServer.process_spawn = prefork_process_spawn
+server.PreforkServer.worker_pop = prefork_worker_pop
 server.ThreadedServer.start = threaded_start
 server.ThreadedServer.stop = threaded_stop

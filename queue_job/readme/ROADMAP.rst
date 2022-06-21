@@ -16,4 +16,3 @@
 .. code-block:: sql
 
   update queue_job set state='pending' where state in ('started', 'enqueued')
-

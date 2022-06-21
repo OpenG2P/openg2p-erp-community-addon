@@ -14,13 +14,13 @@ web_m2x_options
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fweb-lightgray.png?logo=github
-    :target: https://github.com/OCA/web/tree/12.0/web_m2x_options
+    :target: https://github.com/OCA/web/tree/14.0/web_m2x_options
     :alt: OCA/web
 .. |badge4| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
-    :target: https://translation.odoo-community.org/projects/web-12-0/web-12-0-web_m2x_options
+    :target: https://translation.odoo-community.org/projects/web-14-0/web-14-0-web_m2x_options
     :alt: Translate me on Weblate
 .. |badge5| image:: https://img.shields.io/badge/runbot-Try%20me-875A7B.png
-    :target: https://runbot.odoo-community.org/runbot/162/12.0
+    :target: https://runbot.odoo-community.org/runbot/162/14.0
     :alt: Try me on Runbot
 
 |badge1| |badge2| |badge3| |badge4| |badge5| 
@@ -83,7 +83,7 @@ in the field's options dict
 
 ``open`` *boolean* (Default: ``False``)
 
-  Makes many2many_tags buttons that open the linked resource
+  Makes many2many_tags and one2many rows buttons that open the linked resource
 
 ``no_color_picker`` *boolean* (Default: ``False``)
 
@@ -115,6 +115,10 @@ If you disable one option, you can enable it for particular field by setting "cr
 
   Whether the field should always show "Search more..." entry or not.
 
+``web_m2x_options.field_limit_entries`` *int*
+
+  Number of displayed lines on all One2many fields
+
 To add these parameters go to Configuration -> Technical -> Parameters -> System Parameters and add new parameters like:
 
 - web_m2x_options.create: False
@@ -122,6 +126,7 @@ To add these parameters go to Configuration -> Technical -> Parameters -> System
 - web_m2x_options.m2o_dialog: False
 - web_m2x_options.limit: 10
 - web_m2x_options.search_more: True
+- web_m2x_options.field_limit_entries: 5
 
 
 Example
@@ -149,7 +154,7 @@ Bug Tracker
 Bugs are tracked on `GitHub Issues <https://github.com/OCA/web/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us smashing it by providing a detailed and welcomed
-`feedback <https://github.com/OCA/web/issues/new?body=module:%20web_m2x_options%0Aversion:%2012.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/OCA/web/issues/new?body=module:%20web_m2x_options%0Aversion:%2014.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -159,6 +164,7 @@ Credits
 Authors
 ~~~~~~~
 
+* initOS GmbH
 * ACSONE SA/NV
 * 0k.io
 * Tecnativa
@@ -177,6 +183,9 @@ Contributors
   * Jairo Llopis <jairo.llopis@tecnativa.com>
   * David Vidal <david.vidal@tecnativa.com>
   * Ernesto Tejeda <ernesto.tejeda87@gmail.com>
+  * Carlos Roca
+* Bhavesh Odedra <bodedra@opensourceintegrators.com>
+* Dhara Solanki <dhara.solanki@initos.com> (http://www.initos.com)
 
 Maintainers
 ~~~~~~~~~~~
@@ -191,6 +200,6 @@ OCA, or the Odoo Community Association, is a nonprofit organization whose
 mission is to support the collaborative development of Odoo features and
 promote its widespread use.
 
-This module is part of the `OCA/web <https://github.com/OCA/web/tree/12.0/web_m2x_options>`_ project on GitHub.
+This module is part of the `OCA/web <https://github.com/OCA/web/tree/14.0/web_m2x_options>`_ project on GitHub.
 
 You are welcome to contribute. To learn how please visit https://odoo-community.org/page/Contribute.

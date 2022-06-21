@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 Camptocamp SA
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
@@ -109,10 +108,10 @@ arguments. See :func:`skip_if`
 
 import logging
 import operator
-
 from collections import defaultdict
 from functools import wraps
 
+# pylint: disable=W7950
 from odoo.addons.component.core import AbstractComponent, Component
 
 _logger = logging.getLogger(__name__)
@@ -122,7 +121,7 @@ try:
 except ImportError:
     _logger.debug("Cannot import 'cachetools'.")
 
-__all__ = ['skip_if']
+__all__ = ["skip_if"]
 
 # Number of items we keep in LRU cache when we collect the events.
 # 1 item means: for an event name, model_name, collection, return
@@ -131,7 +130,7 @@ DEFAULT_EVENT_CACHE_SIZE = 512
 
 
 def skip_if(cond):
-    """ Decorator allowing to skip an event based on a condition
+    """Decorator allowing to skip an event based on a condition
 
     The condition is a python lambda expression, which takes the
     same arguments than the event.
@@ -151,6 +150,7 @@ def skip_if(cond):
             record.with_delay().export_record()
 
     """
+
     def skip_if_decorator(func):
         @wraps(func)
         def func_wrapper(*args, **kwargs):
@@ -160,11 +160,12 @@ def skip_if(cond):
                 return func(*args, **kwargs)
 
         return func_wrapper
+
     return skip_if_decorator
 
 
 class CollectedEvents(object):
-    """ Event methods ready to be notified
+    """Event methods ready to be notified
 
     This is a rather internal class. An instance of this class
     is prepared by the :class:`EventCollecter` when we need to notify
@@ -185,13 +186,13 @@ class CollectedEvents(object):
         self.events = events
 
     def notify(self, *args, **kwargs):
-        """ Forward the arguments to every listeners of an event """
+        """Forward the arguments to every listeners of an event"""
         for event in self.events:
             event(*args, **kwargs)
 
 
 class EventCollecter(Component):
-    """ Component that collects the event from an event name
+    """Component that collects the event from an event name
 
     For doing so, it searches all the components that respond to the
     ``event.listener`` ``_usage`` and having an event of the same
@@ -213,11 +214,12 @@ class EventCollecter(Component):
     It is used by :meth:`odoo.addons.component_event.models.base.Base._event`.
 
     """
-    _name = 'base.event.collecter'
+
+    _name = "base.event.collecter"
 
     @classmethod
     def _complete_component_build(cls):
-        """ Create a cache on the class when the component is built """
+        """Create a cache on the class when the component is built"""
         super(EventCollecter, cls)._complete_component_build()
         # the _cache being on the component class, which is
         # dynamically rebuild when odoo registry is rebuild, we
@@ -229,18 +231,14 @@ class EventCollecter(Component):
         collection_name = None
         if self.work._collection is not None:
             collection_name = self.work.collection._name
-        return self._collect_events_cached(
-            collection_name,
-            self.work.model_name,
-            name
-        )
+        return self._collect_events_cached(collection_name, self.work.model_name, name)
 
-    @cachedmethod(operator.attrgetter('_cache'))
+    @cachedmethod(operator.attrgetter("_cache"))
     def _collect_events_cached(self, collection_name, model_name, name):
         events = defaultdict(set)
         component_classes = self.work.components_registry.lookup(
             collection_name=collection_name,
-            usage='event.listener',
+            usage="event.listener",
             model_name=model_name,
         )
         for cls in component_classes:
@@ -257,8 +255,8 @@ class EventCollecter(Component):
         return events
 
     def collect_events(self, name):
-        """ Collect the events of a given name """
-        if not name.startswith('on_'):
+        """Collect the events of a given name"""
+        if not name.startswith("on_"):
             raise ValueError("an event name always starts with 'on_'")
 
         events = self._init_collected_events(self._collect_events(name))
@@ -266,28 +264,29 @@ class EventCollecter(Component):
 
 
 class EventListener(AbstractComponent):
-    """ Base Component for the Event listeners
+    """Base Component for the Event listeners
 
     Events must be methods starting with ``on_``.
 
     Example: :class:`RecordsEventListener`
 
     """
-    _name = 'base.event.listener'
-    _usage = 'event.listener'
+
+    _name = "base.event.listener"
+    _usage = "event.listener"
 
     @classmethod
     def has_event(cls, name):
-        """ Indicate if the class has an event of this name """
+        """Indicate if the class has an event of this name"""
         return name in cls._events
 
     @classmethod
     def _build_event_listener_component(cls):
-        """ Make a list of events listeners for this class """
-        events = set([])
+        """Make a list of events listeners for this class"""
+        events = set()
         if not cls._abstract:
             for attr_name in dir(cls):
-                if attr_name.startswith('on_'):
+                if attr_name.startswith("on_"):
                     events.add(attr_name)
         cls._events = events
 

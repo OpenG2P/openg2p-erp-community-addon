@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from odoo import registry, models, api
+from odoo import models, api
 
 _logger = logging.getLogger(__name__)
 
@@ -29,14 +29,16 @@ class GenericMixinTransactionUtils(models.AbstractModel):
         """
         if self:
             # pylint: disable=sql-injection
-            self.env.cr.execute("""
-                SELECT id
-                FROM "{table_name}"
-                WHERE id IN %(ids)s
-                FOR UPDATE NOWAIT;
-            """.format(table_name=self._table), {  # nosec
-                'ids': tuple(self.ids),
-            })
+            self.env.cr.execute(  # nosec
+                """
+                    SELECT id
+                    FROM "{table_name}"
+                    WHERE id IN %(ids)s
+                    FOR UPDATE NOWAIT;
+                """.format(table_name=self._table), {
+                    'ids': tuple(self.ids),
+                }
+            )
 
     @contextmanager
     def _in_new_transaction(self, lock=False, no_raise=False):
@@ -56,11 +58,8 @@ class GenericMixinTransactionUtils(models.AbstractModel):
         """
 
         with api.Environment.manage():
-            with registry(self.env.cr.dbname).cursor() as new_cr:
-                new_env = api.Environment(
-                    new_cr,
-                    self.env.uid,
-                    self.env.context.copy())
+            with self.env.registry.cursor() as new_cr:
+                new_env = self.env(cr=new_cr)
                 nself = self.with_env(new_env)
 
                 if lock:
@@ -76,3 +75,25 @@ class GenericMixinTransactionUtils(models.AbstractModel):
                         new_cr.rollback()
                     else:
                         raise
+                else:
+                    # We need to flush, to ensure all pending computations are
+                    # saved into DB before commiting and closing cursor
+                    nself.flush()
+
+    def _iter_in_transact(self, lock=False, no_raise=False):
+        """ Iterate over records in self, yield each record wrapped in separate
+            transaction
+
+            :param bool lock: lock records in self for update (nowait)
+            :param bool no_raise: Do not raise errors,
+                                  just roll back transaction instead
+
+            Example of usage:
+
+                for rec in self._iter_in_transact():
+                    rec.do_some_operation()
+
+        """
+        for rec in self:
+            with rec._in_new_transaction(lock=lock, no_raise=no_raise) as nrec:
+                yield nrec

@@ -9,6 +9,6 @@ Improvements to the search view in this addon:
 * Use widgets ``many2many_tags`` when searching ``many2many`` fields
 * Allow to edit current full search using the advanced domain editor
 
-Improvements to the `is child of`/`is parent of` operators:
+Issues:
 
-* Show the operators only for models with `_parent_store = True`
+* Grouped totals can show incorrect values. See https://github.com/odoo/odoo/issues/47950

@@ -15,7 +15,7 @@ class MassOperationMixin(models.AbstractModel):
 
     # To Overwrite Section (Optional)
     def _prepare_action_name(self):
-        return _("Mass Operation (%s)" % (self.name))
+        return _("Mass Operation (%s)") % self.name
 
     def _get_model_domain(self):
         return [("transient", "=", False)]
@@ -67,9 +67,11 @@ class MassOperationMixin(models.AbstractModel):
         for mixin in self:
             if not mixin.ref_ir_act_window_id:
                 mixin.ref_ir_act_window_id = action_obj.create(mixin._prepare_action())
+        return True
 
     def disable_mass_operation(self):
         self.mapped("ref_ir_act_window_id").unlink()
+        return True
 
     # Overload Section
     def unlink(self):
