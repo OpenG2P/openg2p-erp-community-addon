@@ -17,6 +17,16 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: generic_mixin
+#: model:ir.model.fields.selection,name:generic_mixin.selection__generic_mixin_entity_lifecycle__lifecycle_state__active
+msgid "Active"
+msgstr ""
+
+#. module: generic_mixin
+#: model:ir.model.fields.selection,name:generic_mixin.selection__generic_mixin_entity_lifecycle__lifecycle_state__archived
+msgid "Archived"
+msgstr ""
+
+#. module: generic_mixin
 #: code:addons/generic_mixin/models/generic_no_unlink.py:0
 #, python-format
 msgid ""
@@ -39,12 +49,20 @@ msgid "Code"
 msgstr ""
 
 #. module: generic_mixin
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_location_type_code_ascii_only
 #: model:ir.model.constraint,message:generic_mixin.constraint_generic_mixin_name_with_code_code_ascii_only
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_service_code_ascii_only
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_service_group_code_ascii_only
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_service_level_code_ascii_only
 msgid "Code must be ascii only"
 msgstr ""
 
 #. module: generic_mixin
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_location_type_code_uniq
 #: model:ir.model.constraint,message:generic_mixin.constraint_generic_mixin_uniq_name_code_code_uniq
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_service_code_uniq
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_service_group_code_uniq
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_service_level_code_uniq
 msgid "Code must be unique."
 msgstr ""
 
@@ -67,6 +85,7 @@ msgstr ""
 
 #. module: generic_mixin
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_data_updatable__display_name
+#: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_entity_lifecycle__display_name
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_get_action__display_name
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_guard_fields__display_name
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_name_by_sequence__display_name
@@ -84,14 +103,29 @@ msgid "Display Name"
 msgstr ""
 
 #. module: generic_mixin
+#: model:ir.model.fields.selection,name:generic_mixin.selection__generic_mixin_entity_lifecycle__lifecycle_state__draft
+msgid "Draft"
+msgstr ""
+
+#. module: generic_mixin
 #: code:addons/generic_mixin/models/generic_parent.py:0
 #, python-format
 msgid "Error ! You cannot create recursive %s."
 msgstr ""
 
 #. module: generic_mixin
+#: model:ir.model,name:generic_mixin.model_generic_mixin_entity_lifecycle
+msgid "Generic Mixin: Entity Lifecycle"
+msgstr ""
+
+#. module: generic_mixin
 #: model:ir.model,name:generic_mixin.model_generic_mixin_get_action
 msgid "Generic Mixin: Get Action"
+msgstr ""
+
+#. module: generic_mixin
+#: model:ir.model,name:generic_mixin.model_generic_mixin_guard_fields
+msgid "Generic Mixin: Guard Fields"
 msgstr ""
 
 #. module: generic_mixin
@@ -156,6 +190,7 @@ msgstr ""
 
 #. module: generic_mixin
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_data_updatable__id
+#: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_entity_lifecycle__id
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_get_action__id
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_guard_fields__id
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_name_by_sequence__id
@@ -181,7 +216,17 @@ msgid ""
 msgstr ""
 
 #. module: generic_mixin
+#: code:addons/generic_mixin/models/generic_mixin_entity_lifecycle.py:0
+#, python-format
+msgid ""
+"It is not allowed to change Lifecycle State fieldfrom %(old_state)s to "
+"%(new_state)s!\n"
+"Allowed next states: %(allowed_states)s"
+msgstr ""
+
+#. module: generic_mixin
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_data_updatable____last_update
+#: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_entity_lifecycle____last_update
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_get_action____last_update
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_guard_fields____last_update
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_name_by_sequence____last_update
@@ -199,12 +244,41 @@ msgid "Last Modified on"
 msgstr ""
 
 #. module: generic_mixin
+#: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_entity_lifecycle__lifecycle_date_activated
+msgid "Lifecycle Date Activated"
+msgstr ""
+
+#. module: generic_mixin
+#: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_entity_lifecycle__lifecycle_date_archived
+msgid "Lifecycle Date Archived"
+msgstr ""
+
+#. module: generic_mixin
+#: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_entity_lifecycle__lifecycle_date_created
+msgid "Lifecycle Date Created"
+msgstr ""
+
+#. module: generic_mixin
+#: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_entity_lifecycle__lifecycle_date_obsolete
+msgid "Lifecycle Date Obsolete"
+msgstr ""
+
+#. module: generic_mixin
+#: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_entity_lifecycle__lifecycle_state
+msgid "Lifecycle State"
+msgstr ""
+
+#. module: generic_mixin
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_name_with_code__name
 msgid "Name"
 msgstr ""
 
 #. module: generic_mixin
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_location_type_name_uniq
 #: model:ir.model.constraint,message:generic_mixin.constraint_generic_mixin_uniq_name_code_name_uniq
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_service_group_name_uniq
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_service_level_name_uniq
+#: model:ir.model.constraint,message:generic_mixin.constraint_generic_service_name_uniq
 msgid "Name must be unique."
 msgstr ""
 
@@ -220,6 +294,11 @@ msgid "Non Updatable"
 msgstr ""
 
 #. module: generic_mixin
+#: model:ir.model.fields.selection,name:generic_mixin.selection__generic_mixin_entity_lifecycle__lifecycle_state__obsolete
+msgid "Obsolete"
+msgstr ""
+
+#. module: generic_mixin
 #: model:ir.model.fields,field_description:generic_mixin.field_generic_mixin_data_updatable__ir_model_data_xmlid
 msgid "XML ID"
 msgstr ""
@@ -227,9 +306,4 @@ msgstr ""
 #. module: generic_mixin
 #: model:ir.model.fields,help:generic_mixin.field_generic_mixin_data_updatable__ir_model_data_xmlid
 msgid "XML ID for this record."
-msgstr ""
-
-#. module: generic_mixin
-#: model:ir.model,name:generic_mixin.model_generic_mixin_guard_fields
-msgid "generic.mixin.guard.fields"
 msgstr ""

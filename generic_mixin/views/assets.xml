@@ -6,8 +6,6 @@
 
             <script type="text/javascript" src="/generic_mixin/static/src/js/refresh_view_mixin.js"/>
             <script type="text/javascript" src="/generic_mixin/static/src/js/web_client.js"/>
-            <script type="text/javascript" src="/generic_mixin/static/src/js/abstract_view.js"/>
-            <script type="text/javascript" src="/generic_mixin/static/src/js/abstract_controller.js"/>
             <script type="text/javascript" src="/generic_mixin/static/src/js/list_renderer.js"/>
             <script type="text/javascript" src="/generic_mixin/static/src/js/kanban_renderer.js"/>
             <script type="text/javascript" src="/generic_mixin/static/src/js/kanban_record.js"/>

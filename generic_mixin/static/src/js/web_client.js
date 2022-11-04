@@ -1,4 +1,3 @@
-/* global Promise*/
 odoo.define('generic_mixin.WebClient', function (require) {
     "use strict";
 
@@ -86,7 +85,7 @@ odoo.define('generic_mixin.WebClient', function (require) {
                 return false;
             }
 
-            if (ctl.widget.generic_mixin__is_multi_record &&
+            if (ctl.widget.isMultiRecord &&
                 (actions.includes('create') || actions.includes('unlink'))) {
                 // Always refresh multirecord view on create or unlink.
                 // There is no need to compare changed ids and displayed ids
@@ -100,11 +99,11 @@ odoo.define('generic_mixin.WebClient', function (require) {
                 active_ids.push(act.res_id);
             }
 
-            if (!ctl.widget.generic_mixin__is_multi_record &&
+            if (!ctl.widget.isMultiRecord &&
                 ctl.widget.renderer.state.res_id) {
                 active_ids = _.union(
                     active_ids, [ctl.widget.renderer.state.res_id]);
-            } else if (ctl.widget.generic_mixin__is_multi_record &&
+            } else if (ctl.widget.isMultiRecord &&
                 ctl.widget.renderer.state.res_ids) {
                 active_ids = _.union(
                     active_ids, ctl.widget.renderer.state.res_ids);
@@ -162,9 +161,6 @@ odoo.define('generic_mixin.WebClient', function (require) {
             var self = this;
 
             var cur_ctl = self.action_manager.getCurrentController();
-
-            // TODO: user controller's mutext to avoid errors like
-            //       'undefined has no attr commitChanges
             self._generic_refresh_mixin__mutex.exec(function () {
                 var promises = [];
                 if (self._generic_mixin_refresh_view__do_refresh_check(
@@ -187,7 +183,7 @@ odoo.define('generic_mixin.WebClient', function (require) {
                 self._generic_refresh_mixin__pending = {};
                 self._generic_refresh_mixin__pending_action = {};
                 self._generic_refresh_mixin__refresh_ids = {};
-                return Promise.all(promises);
+                return $.when.apply($, promises);
             });
         },
 

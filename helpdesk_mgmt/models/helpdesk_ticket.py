@@ -6,9 +6,9 @@ class HelpdeskTicket(models.Model):
     _name = "helpdesk.ticket"
     _description = "Helpdesk Ticket"
     _rec_name = "number"
-    _order = "number desc"
+    _order = "priority desc, number desc, id desc"
     _mail_post_access = "read"
-    _inherit = ["mail.thread.cc", "mail.activity.mixin"]
+    _inherit = ["mail.thread.cc", "mail.activity.mixin", "portal.mixin"]
 
     def _get_default_stage_id(self):
         return self.env["helpdesk.ticket.stage"].search([], limit=1).id
@@ -41,11 +41,9 @@ class HelpdeskTicket(models.Model):
     partner_name = fields.Char()
     partner_email = fields.Char(string="Email")
 
-    last_stage_update = fields.Datetime(
-        string="Last Stage Update", default=fields.Datetime.now
-    )
-    assigned_date = fields.Datetime(string="Assigned Date")
-    closed_date = fields.Datetime(string="Closed Date")
+    last_stage_update = fields.Datetime(default=fields.Datetime.now)
+    assigned_date = fields.Datetime()
+    closed_date = fields.Datetime()
     closed = fields.Boolean(related="stage_id.closed")
     unattended = fields.Boolean(related="stage_id.unattended", store=True)
     tag_ids = fields.Many2many(comodel_name="helpdesk.ticket.tag", string="Tags")
@@ -76,7 +74,6 @@ class HelpdeskTicket(models.Model):
             ("2", "High"),
             ("3", "Very High"),
         ],
-        string="Priority",
         default="1",
     )
     attachment_ids = fields.One2many(
@@ -92,7 +89,6 @@ class HelpdeskTicket(models.Model):
             ("done", "Ready for next stage"),
             ("blocked", "Blocked"),
         ],
-        string="Kanban State",
     )
     active = fields.Boolean(default=True)
 
@@ -162,6 +158,12 @@ class HelpdeskTicket(models.Model):
             seq = seq.with_company(values["company_id"])
         return seq.next_by_code("helpdesk.ticket.sequence") or "/"
 
+    def _compute_access_url(self):
+        res = super()._compute_access_url()
+        for item in self:
+            item.access_url = "/my/ticket/%s" % (item.id)
+        return res
+
     # ---------------------------------------------------
     # Mail gateway
     # ---------------------------------------------------
@@ -174,7 +176,7 @@ class HelpdeskTicket(models.Model):
                 ticket.stage_id.mail_template_id,
                 {
                     "auto_delete_message": True,
-                    "subtype_id": self.env["ir.model.data"].xmlid_to_res_id(
+                    "subtype_id": self.env["ir.model.data"]._xmlid_to_res_id(
                         "mail.mt_note"
                     ),
                     "email_layout_xmlid": "mail.mail_notification_light",
@@ -247,5 +249,5 @@ class HelpdeskTicket(models.Model):
         except AccessError:
             # no read access rights -> just ignore suggested recipients because this
             # imply modifying followers
-            pass
+            return recipients
         return recipients

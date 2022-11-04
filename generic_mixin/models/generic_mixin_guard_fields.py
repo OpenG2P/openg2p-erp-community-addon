@@ -5,7 +5,7 @@ _logger = logging.getLogger(__name__)
 
 
 class GenericMixinGuardFields(models.AbstractModel):
-    """ This mixin is desined to be able to disable writes on some field,
+    """ This mixin is designed to be able to disable writes on some field,
         or restrict writes to some fields to be available only in specific
         places.
 
@@ -17,12 +17,19 @@ class GenericMixinGuardFields(models.AbstractModel):
         fields only if value was wrapped with correct wrapper.
     """
     _name = 'generic.mixin.guard.fields'
+    _description = 'Generic Mixin: Guard Fields'
 
     _generic_mixin_guard_fields = []
     _generic_mixin_deny_write_fields = []
 
     class GuardInteger(int):
         """ Guard class for integer fields.
+        """
+        def unwrap(self):
+            return int(self)
+
+    class GuardMany2oneReference(int):
+        """ Guard class for many2one_reference fields.
         """
         def unwrap(self):
             return int(self)
@@ -37,6 +44,8 @@ class GenericMixinGuardFields(models.AbstractModel):
         """
         if self._fields[field_name].type == 'integer':
             return self.GuardInteger
+        if self._fields[field_name].type == 'many2one_reference':
+            return self.GuardMany2oneReference
         raise TypeError(
             "Field %s could not be guarded. Type %s is not supported." % (
                 field_name, self._fields[field_name].type
@@ -53,17 +62,35 @@ class GenericMixinGuardFields(models.AbstractModel):
         GuardClass = self._generic_mixin_guard__get_guard_class(field_name)
         return GuardClass(value)
 
+    def _generic_mixin_guard__get_guard_fields(self):
+        """ Get list of fields that have to be guarded
+
+            :return list[str]: List of names of fields to be guarded
+        """
+        if self._generic_mixin_guard_fields:
+            return list(self._generic_mixin_guard_fields)
+        return []
+
+    def _generic_mixin_guard__get_deny_write_fields(self):
+        """ Get list of fields not allowed to write at all
+
+            :return list[str]: List of names of fields to deny write
+        """
+        if self._generic_mixin_deny_write_fields:
+            return list(self._generic_mixin_deny_write_fields)
+        return []
+
     def _generic_mixin_guard__do_guard_fields(self, vals):
         res = dict(vals)
-        for field_name in self._generic_mixin_deny_write_fields:
+        for field_name in self._generic_mixin_guard__get_deny_write_fields():
             if field_name in res:
                 _logger.warning(
-                    "Trying update / create object with '%s' "
+                    "Trying update / create object (%s) with '%s' "
                     "field specified, but this field will be computed "
-                    "automatically.", field_name)
+                    "automatically.", self._name, field_name)
                 del res[field_name]
 
-        for field_name in self._generic_mixin_guard_fields:
+        for field_name in self._generic_mixin_guard__get_guard_fields():
             if field_name not in res:
                 continue
             val = res[field_name]

@@ -53,7 +53,6 @@
                             />
                         </group>
                         <group name="main_right">
-                            <field name="fold" />
                             <field name="closed" />
                             <field name="unattended" />
                         </group>
@@ -67,7 +66,7 @@
         <field name="name">helpdesk.ticket.stage.tree</field>
         <field name="model">helpdesk.ticket.stage</field>
         <field name="arch" type="xml">
-            <tree string="Ticket Stages">
+            <tree>
                 <field name="sequence" widget="handle" />
                 <field name="name" />
                 <field name="mail_template_id" />
